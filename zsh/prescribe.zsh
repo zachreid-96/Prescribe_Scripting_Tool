@@ -1,12 +1,12 @@
 #!/bin/zsh
 
-defined_ip=""
+declared_ip=""
 
 # Passed args
 # 	$1 = arg_1 and should be the IP address
 # 	$2 = arg_2 and should be the desired prescribe command
 # Gets the IP address from the user. Specifically the IP of the copier/printer
-# If no input is entered, the preprogrammed error list will be displayed and exit intentionally
+# If no input is entered, the pre-programmed error list will be displayed and exit intentionally
 # Will then call split_ip
 # NO RETURNS
 
@@ -16,7 +16,7 @@ get_ip() {
 	passed_command="$2"
   machine_ip=""
 
-	if [[ -n "$defined_ip" ]]
+	if [[ -n "$declared_ip" ]]
 	then
 
 		ping_ip "$passed_ip" "$passed_command"
@@ -268,7 +268,7 @@ toggle_line_mode() {
       printf "!R! FRPO U0,6; FRPO U1,60; EXIT;" > "$file_path_60"
     fi
     if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_on"
+      nc "$passed_ip" < "$file_path_60"
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
@@ -277,10 +277,10 @@ toggle_line_mode() {
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
       fi
-      printf "!R! FRPO U0,6; FRPO U1,66; EXIT;" > "$file_path_off"
+      printf "!R! FRPO U0,6; FRPO U1,66; EXIT;" > "$file_path_66"
     fi
     if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_off"
+      nc "$passed_ip" < "$file_path_66"
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
@@ -321,8 +321,8 @@ toggle_tray_switch() {
 toggle_sleep_timer() {
   passed_ip="$1"
   dir_path="$HOME/Kyocera_commands"
-  file_path_on="$HOME/Kyocera_commands/3_tier_on.txt"
-  file_path_off="$HOME/Kyocera_commands/3_tier_off.txt"
+  file_path_on="$HOME/Kyocera_commands/sleep_timer_on.txt"
+  file_path_off="$HOME/Kyocera_commands/sleep_timer_off.txt"
 
   if [[ "$2" == 8 ]]; then
     if [[ ! -f "$file_path" ]]; then
@@ -423,26 +423,107 @@ error_list() {
 # Variable declaration
 # NO RETURNS
 
+declared_ip=""
+declare -a ip_arr=()
+
 arg_1="$1"
 arg_2="$2"
 
 if [[ -z "$arg_1" && -z "$arg_2" ]]; then
 	# Handle no args passed logic here
 
-	if [[ -z "$defined_ip" ]]; then
+	if [[ -z "$declared_ip" ]]; then
 		get_ip "$arg_1" "$arg_2"
 
 	else
-		ping_ip "$defined_ip" "$arg_2"
+		ping_ip "$declared_ip" "$arg_2"
 	fi
 
 elif [[ -n "$arg_1" && -z "$arg_2" ]]; then
-	# Handle one arg passed logic here
+	# Checks if first passed arg is in IP address format
+  if [[ "$arg_1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+
+    # Checks to see if passed IP and defined IP (if applicable) match
+  	# If not a match, prompts to use defined IP or passed IP
+  	if [[ -n "$declared_ip" && "$arg_1" != "$declared_ip" ]]; then
+
+  		echo ""
+  		echo "Passed IP does not matched Defined IP"
+  		echo ""
+  		echo "Enter (Y) to continue with Passed IP: $arg_1"
+  		echo "Enter (N) to continue with Defined IP: $declared_ip"
+  		read -pr "Your choice (Y/N): " choice
+
+  		case "$choice" in
+  			[Yy]*) ping_ip "$arg_1" "$arg_2" ;;
+  			[Nn]*) ping_ip "$declared_ip" "$arg_2" ;;
+  			*) error_exit "IP_MISMATCH_ERROR" ;;
+  		esac
+  	else
+  		ping_ip "$arg_1" "$arg_2"
+  	fi
+  # If not in IP address format will pass arg_1 in the place of arg_2
+  # This will prompt the user for an IP in get_ip or use defined IP (if applicable)
+  else
+  	if [[ -z "$declared_ip" ]]; then
+  		get_ip "$declared_ip" "$arg_1"
+  	else
+  		ping_ip "$declared_ip" "$arg_1"
+  	fi
+  fi
 	safe_exit
 
 elif [[ -n "$arg_1" && -n "$arg_2" ]]; then
-	# Handle two args passed logic here
-	safe_exit
+	# Checks if first passed arg is in IP address format
+  if [[ "$arg_1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 
+  	# Checks to see if passed IP and defined IP (if applicable) match
+  	# If not a match, prompts to use defined IP or passed IP
+  	if [[ -n "$declared_ip" && "$arg_1" != "$declared_ip" ]]; then
+
+  		echo ""
+  		echo "Passed IP does not matched Defined IP"
+  		echo ""
+  		echo "Enter (Y) to continue with Passed IP: $arg_1"
+  		echo "Enter (N) to continue with Defined IP: $declared_ip"
+  		read -pr "Your choice (Y/N): " choice
+   		case "$choice" in
+  			[Yy]*) ping_ip "$arg_1" "$arg_2" ;;
+  			[Nn]*) ping_ip "$declared_ip" "$arg_2" ;;
+  			*) error_exit "IP_MISMATCH_ERROR" ;;
+  		esac
+  	else
+  		ping_ip "$arg_1" "$arg_2"
+  	fi
+
+  # Checks to see if the IP is passed as second arg instead of first arg (SHOULD BE FIRST ARG)
+  # If args are swapped (event_ log 172.1.0.214) will swap positions when calling ping_ip
+  elif [[ ! "$arg_1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ && "$arg_2" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  	echo ""
+  	echo "Detected swapped argument ordering. Correcting..."
+
+  	# Checks to see if passed IP and defined IP (if applicable) match
+  	# If not a match, prompts to use defined IP or passed IP
+  	if [[ -n "$declared_ip" && "$arg_2" != "$declared_ip" ]]; then
+   		echo ""
+  		echo "Passed IP does not matched Defined IP"
+  		echo "Enter (Y) to continue with Passed IP: $arg_2"
+  		echo "Enter (N) to continue with Defined IP: $declared_ip"
+  		read -pr "Your choice (Y/N): " choice
+   		case "$choice" in
+  			[Yy]*) ping_ip "$arg_2" "$arg_1" ;;
+  			[Nn]*) ping_ip "$declared_ip" "$arg_1" ;;
+  			*) error_exit "IP_MISMATCH_ERROR" ;;
+  		esac
+  	else
+  		ping_ip "$arg_2" "$arg_1"
+  	fi
+  # Failsafe if args cannot be parsed or processed correctly
+  else
+  	echo ""
+  	echo "Error in process: $arg_1 | $arg_2"
+  	error_exit "CLI_INVALID_ARGUMENTS_ERROR"
+  fi
+	safe_exit
 fi
 

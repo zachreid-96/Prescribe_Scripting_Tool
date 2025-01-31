@@ -35,11 +35,11 @@ get_ip() {
 	read -r -p "Enter IP Address: " ip
 	echo
 
-	if [[ -z "$ip" ]]; then
+	if [[ -z "$declared_ip" ]]; then
 		error_list
 	else
-		# echo "debug ip -- $ip"
-		split_ip "$ip" "$command"
+		# echo "debug ip -- $declared_ip"
+		split_ip "$declared_ip" "$command"
 	fi
 }
 
@@ -113,7 +113,7 @@ split_ip() {
 	fi
 
 	ip="${ip_arr[0]}.${ip_arr[1]}.${ip_arr[2]}.${ip_arr[3]}"
-	# echo "debugging assembled ip --$ip"
+	# echo "debugging assembled ip --$declared_ip"
 	ping_ip "$ip" "$command"
 
 }
@@ -286,6 +286,13 @@ error_exit() {
 	exit 1
 }
 
+safe_exit() {
+	echo
+	echo "Runtime success. Press any key to exit..."
+  read -nr 1 -s
+	exit 1
+}
+
 # NO PASSED ARGS
 # Prints out all pre-programmed error codes, description, and an example or two
 # NO RETURNS
@@ -335,7 +342,7 @@ error_list() {
 # Variable declaration
 # NO RETURNS
 
-ip=""
+declared_ip=""
 declare -a ip_arr=()
 
 arg_1="$1"
@@ -345,34 +352,34 @@ arg_2="$2"
 if [[ -z "$arg_1" && -z "$arg_2" ]]; then
 
 	# No IP is defined, ask for one
-    if [[ -z "$ip" ]]; then
-        get_ip "$ip" "$arg_2"
+    if [[ -z "$declared_ip" ]]; then
+        get_ip "$declared_ip" "$arg_2"
 
     # IP is defined in the script, proceed with it
     else
-        ping_ip "$ip" "$arg_2"
+        ping_ip "$declared_ip" "$arg_2"
     fi
 
 # for CLI activation: with one (1) arg passed
 elif [[ -n "$arg_1" && -z "$arg_2" ]]; then
 
 	# Checks if first passed arg is in IP address format
-    if [[ "$arg_1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  if [[ "$arg_1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 
 		# Checks to see if passed IP and defined IP (if applicable) match
 		# If not a match, prompts to use defined IP or passed IP
-		if [[ -n "$ip" && "$arg_1" != "$ip" ]]; then
+		if [[ -n "$declared_ip" && "$arg_1" != "$declared_ip" ]]; then
 
 			echo ""
 			echo "Passed IP does not matched Defined IP"
 			echo ""
 			echo "Enter (Y) to continue with Passed IP: $arg_1"
-			echo "Enter (N) to continue with Defined IP: $ip"
+			echo "Enter (N) to continue with Defined IP: $declared_ip"
 			read -pr "Your choice (Y/N): " choice
 
 			case "$choice" in
 				[Yy]*) ping_ip "$arg_1" "$arg_2" ;;
-				[Nn]*) ping_ip "$ip" "$arg_2" ;;
+				[Nn]*) ping_ip "$declared_ip" "$arg_2" ;;
 				*) error_exit "IP_MISMATCH_ERROR" ;;
 			esac
 		else
@@ -381,33 +388,33 @@ elif [[ -n "$arg_1" && -z "$arg_2" ]]; then
 	# If not in IP address format will pass arg_1 in the place of arg_2
 	# This will prompt the user for an IP in get_ip or use defined IP (if applicable)
 	else
-		if [[ -z "$ip" ]]; then
-			get_ip "$ip" "$arg_1"
+		if [[ -z "$declared_ip" ]]; then
+			get_ip "$declared_ip" "$arg_1"
 		else
-			ping_ip "$ip" "$arg_1"
+			ping_ip "$declared_ip" "$arg_1"
 		fi
-    fi
+  fi
 
 # for CLI activation: with two (2) passed args
 elif [[ -n "$arg_1" && -n "$arg_2" ]]; then
 
 	# Checks if first passed arg is in IP address format
-    if [[ "$arg_1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  if [[ "$arg_1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 
 		# Checks to see if passed IP and defined IP (if applicable) match
 		# If not a match, prompts to use defined IP or passed IP
-		if [[ -n "$ip" && "$arg_1" != "$ip" ]]; then
+		if [[ -n "$declared_ip" && "$arg_1" != "$declared_ip" ]]; then
 
 			echo ""
 			echo "Passed IP does not matched Defined IP"
 			echo ""
 			echo "Enter (Y) to continue with Passed IP: $arg_1"
-			echo "Enter (N) to continue with Defined IP: $ip"
+			echo "Enter (N) to continue with Defined IP: $declared_ip"
 			read -pr "Your choice (Y/N): " choice
 
 			case "$choice" in
 				[Yy]*) ping_ip "$arg_1" "$arg_2" ;;
-				[Nn]*) ping_ip "$ip" "$arg_2" ;;
+				[Nn]*) ping_ip "$declared_ip" "$arg_2" ;;
 				*) error_exit "IP_MISMATCH_ERROR" ;;
 			esac
 		else
@@ -422,17 +429,17 @@ elif [[ -n "$arg_1" && -n "$arg_2" ]]; then
 
 		# Checks to see if passed IP and defined IP (if applicable) match
 		# If not a match, prompts to use defined IP or passed IP
-		if [[ -n "$ip" && "$arg_2" != "$ip" ]]; then
+		if [[ -n "$declared_ip" && "$arg_2" != "$declared_ip" ]]; then
 
 			echo ""
 			echo "Passed IP does not matched Defined IP"
 			echo "Enter (Y) to continue with Passed IP: $arg_2"
-			echo "Enter (N) to continue with Defined IP: $ip"
+			echo "Enter (N) to continue with Defined IP: $declared_ip"
 			read -pr "Your choice (Y/N): " choice
 
 			case "$choice" in
 				[Yy]*) ping_ip "$arg_2" "$arg_1" ;;
-				[Nn]*) ping_ip "$ip" "$arg_1" ;;
+				[Nn]*) ping_ip "$declared_ip" "$arg_1" ;;
 				*) error_exit "IP_MISMATCH_ERROR" ;;
 			esac
 		else

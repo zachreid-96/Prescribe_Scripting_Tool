@@ -1,6 +1,6 @@
 :: Stylistic section of the program, turns echo off so these commands do not appear in CMD
 @echo off
-title Kyocera Prescript Command Prompt
+title Kyocera Scripting Tool
 setlocal enableextensions enabledelayedexpansion
 
 :: Color options
