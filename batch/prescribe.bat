@@ -196,13 +196,17 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 
 	if "%passed_command%"=="" (
 		echo.
-		echo Command options
-		echo 1 - Event Log
-		echo 2 - 3 Tier Color
-		echo 3 - 60 Lines
-		echo 4 - Tray Switch
-		echo 5 - Sleep Timer
-		echo 99 - Print Error list
+		echo Command Options:
+        echo [ 1 ] - Event Log
+        echo [ 2 ] - Turn on 3 Tier Color
+        echo [ 3 ] - Turn off 3 Tier Color
+        echo [ 4 ] - Turn on 60 Lines Mode
+        echo [ 5 ] - Turn on 66 Lines Mode
+        echo [ 6 ] - Turn on Tray Switch
+        echo [ 7 ] - Turn off Tray Switch
+        echo [ 8 ] - Turn on Sleep Timer
+        echo [ 9 ] - Turn off Sleep Timer
+        echo [ 0 ] - Display Error Menu List
 
 		set /p "command=Enter Menu Choice: " || set "command=99"
 	)
@@ -217,82 +221,149 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 
 	if %command%==1 (set match=1)
 	if "%passed_command%"=="event_log" (set match=1)
+
 	if %command%==2 (set match=2)
-	if "%passed_command%"=="3_tier_color" (set match=2)
+	if "%passed_command%"=="tiered_color_on" (set match=2)
 	if %command%==3 (set match=3)
-	if "%passed_command%"=="60_lines" (set match=3)
+    if "%passed_command%"=="tiered_color_off" (set match=3)
+
 	if %command%==4 (set match=4)
-	if "%passed_command%"=="no_tray_switch" (set match=4)
-	if %command%==5 (set match=5)
-	if "%passed_command%"=="sleep_timer" (set match=5)
+    if "%passed_command%"=="60_lines" (set match=4)
+    if %command%==5 (set match=5)
+    if "%passed_command%"=="66_lines" (set match=5)
 
-	if !match!==1 (
+	if %command%==6 (set match=6)
+	if "%passed_command%"=="tray_switch_on" (set match=6)
+	if %command%==7 (set match=7)
+    if "%passed_command%"=="tray_switch_off" (set match=7)
 
-		set "file_path=%USERPROFILE%\Kyocera_Commands\event_log.txt"
+	if %command%==8 (set match=8)
+    if "%passed_command%"=="sleep_timer_on" (set match=8)
+    if %command%==9 (set match=9)
+    if "%passed_command%"=="sleep_timer_off" (set match=9)
 
-		if not exist "!file_path!" (
-			(
-				echo | set /p="^!R^!KCFG"ELOG";EXIT;">"!file_path!"
-			)
-		)
-		call :lpr_command "%passed_ip%" "!file_path!"
-		exit
+    if %command%==0 (set match=0)
+    if "%passed_command%"=="print_error_list" (set match=0)
 
-	) else if !match!==2 (
-
-		set "file_path=%USERPROFILE%\Kyocera_Commands\3_tier_color.txt"
-
-		if not exist "!file_path!" (
-			(
-				echo | set /p="^!R^!KCFG"TCCM",1;EXIT;">"!file_path!"
-			)
-		)
-		call :lpr_command "%passed_ip%" "!file_path!"
-		exit
-
-	) else if !match!==3 (
-
-		set "file_path=%USERPROFILE%\Kyocera_Commands\60_lines.txt"
-
-		if not exist "!file_path!" (
-			(
-				echo | set /p="^!R^! FRPO U0,6; FRPO U1,60; EXIT;">"!file_path!"
-			)
-		)
-		call :lpr_command "%passed_ip%" "!file_path!"
-		exit
-
-	) else if !match!==4 (
-
-		set "file_path=%USERPROFILE%\Kyocera_Commands\no_tray_switch.txt"
-
-		if not exist "!file_path!" (
-			(
-				echo | set /p="^!R^! FRPO A2,10; EXIT;">"!file_path!"
-			)
-		)
-		call :lpr_command "%passed_ip%" "!file_path!"
-		exit
-
-	) else if !match!==5 (
-
-		set "file_path=%USERPROFILE%\Kyocera_Commands\sleep_timer.txt"
-
-		if not exist "!file_path!" (
-			(
-				echo | set /p="^!R^! FRPO N5,0; EXIT;">"!file_path!"
-			)
-		)
-		call :lpr_command "%passed_ip%" "!file_path!"
-		exit
-
-	) else if %command%==99 (
-		call :print_error_codes
-		exit
-	)
+	if !match!==1 ( call :event_log "%passed_ip%" "%match%" )
+	if !match!==2 ( call :toggle_tiered_color "%passed_ip%" "%match%" )
+	if !match!==3 ( call :toggle_tiered_color "%passed_ip%" "%match%" )
+	if !match!==4 ( call :toggle_line_mode "%passed_ip%" "%match%" )
+	if !match!==5 ( call :toggle_line_mode "%passed_ip%" "%match%" )
+	if !match!==6 ( call :toggle_tray_switch "%passed_ip%" "%match%" )
+	if !match!==7 ( call :toggle_tray_switch "%passed_ip%" "%match%" )
+	if !match!==8 ( call :toggle_sleep_timer "%passed_ip%" "%match%" )
+	if !match!==9 ( call :toggle_sleep_timer "%passed_ip%" "%match%" )
+	if %command%==0 ( call :print_error_codes )
 
 	call :error_exit "[INVALID_COMMAND_CHOICE_ERROR]"
 	exit
+
+:event_log
+    set "passed_ip=%~1"
+    set "file_path=%USERPROFILE%\Kyocera_Commands\event_log.txt"
+
+	if not exist "!file_path!" (
+		(
+			echo | set /p="^!R^!KCFG"ELOG";EXIT;">"!file_path!"
+		)
+	)
+	call :lpr_command "%passed_ip%" "!file_path!"
+	exit
+
+:toggle_tiered_color
+    set "file_path="
+
+    if "%2"==2 (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\3_tier_color_on.txt"
+        if not exist "!file_path!" (
+            (
+                :: echo | set /p="^!R^!KCFG"TCCM",1;EXIT;">"!file_path!"
+                echo | set /p="!R!KCFG"TCCM",1;">"!file_path!"
+                echo | set /p="!R!KCFG"STCT",1,20;">>"!file_path!"
+                echo | set /p="!R!KCFG"STCT",2,50;EXIT;">>"!file_path!"
+            )
+        )
+    ) else (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\3_tier_color_off.txt"
+        if not exist "!file_path!" (
+            (
+                :: echo | set /p="^!R^!KCFG"TCCM",0;EXIT;">"!file_path!"
+                echo | set /p="!R!KCFG"TCCM",0;">"!file_path!"
+            )
+        )
+    )
+    call :lpr_command "%passed_ip%" "!file_path!"
+    exit
+
+:toggle_line_mode
+    set "file_path="
+
+    if "%2"==4 (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\60_line_mode.txt"
+        if not exist "!file_path!" (
+            (
+                :: echo | set /p="!R! FRPO U0,6; FRPO U1,60; EXIT;">"!file_path!"
+                echo | set /p="!R! FRPO U0,6; FRPO U1,60; EXIT;">"!file_path!"
+            )
+        )
+    ) else (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\66_line_mode.txt"
+        if not exist "!file_path!" (
+            (
+                :: echo | set /p="!R! FRPO U0,6; FRPO U1,66; EXIT;">"!file_path!"
+                echo | set /p="!R! FRPO U0,6; FRPO U1,66; EXIT;">"!file_path!"
+            )
+        )
+    )
+    call :lpr_command "%passed_ip%" "!file_path!"
+    exit
+
+:toggle_tray_switch
+    set "file_path="
+
+    if "%2"==6 (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\tray_switch_on.txt"
+        if not exist "!file_path!" (
+            (
+                :: echo | set /p="!R! FRPO A2,10; EXIT;">"!file_path!" Needs Editing
+                echo | set /p="!R! FRPO A2,10; EXIT;">"!file_path!"
+            )
+        )
+    ) else (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\tray_switch_off.txt"
+        if not exist "!file_path!" (
+            (
+                :: echo | set /p="!R! FRPO A2,10; EXIT;">"!file_path!"
+                echo | set /p="!R! FRPO A2,10; EXIT;">"!file_path!"
+            )
+        )
+    )
+    call :lpr_command "%passed_ip%" "!file_path!"
+    exit
+
+:toggle_sleep_timer
+    set "file_path="
+
+    if "%2"==8 (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\sleep_timer_on.txt"
+        if not exist "!file_path!" (
+            (
+                :: echo | set /p="!R! FRPO N5,0; EXIT;">"!file_path!" Needs Editing
+                echo | set /p="!R! FRPO N5,0; EXIT;">"!file_path!"
+            )
+        )
+    ) else (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\sleep_timer_off.txt"
+        if not exist "!file_path!" (
+            (
+                :: echo | set /p="!R! FRPO N5,0; EXIT;">"!file_path!"
+                echo | set /p="!R! FRPO N5,0; EXIT;">"!file_path!"
+            )
+        )
+    )
+    call :lpr_command "%passed_ip%" "!file_path!"
+    exit
 
 :: Uses LPR to send the command to the Device
 :: Does ping the device first to see if it is reachable
