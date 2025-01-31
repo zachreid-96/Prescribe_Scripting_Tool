@@ -12,5 +12,5 @@ This repository contains the script tool in mulitple languages:
 ## Getting Started
 Clone the repository:
 ```shell
-git clone https://github.com/
+git clone https://github.com/zachreid-96/Prescribe_Scripting_Tool
 ```
