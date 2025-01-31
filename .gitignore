@@ -1,0 +1,33 @@
+# Ignore IntelliJ IDEA project files
+.idea/
+*.iml
+
+# Ignore system-generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore logs
+*.log
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environments (Python)
+venv/
+.env/
+*.venv
+
+# Ignore Bash and Zsh shell history (if needed)
+.bash_history
+.zsh_history
+
+# Ignore temporary and swap files
+*.swp
+*.swo
+
+# Ignore Windows batch file backup (tilde at the end)
+*.bat~
