@@ -15,17 +15,16 @@ echo -ne "\033]0;Kyocera Prescribe Command\007"
 # 	$1 = arg_1 and should be the IP address
 # 	$2 = arg_2 and should be the desired prescribe command
 # Gets the IP address from the user. Specifically the IP of the copier/printer
-# If no input is entered, the preprogrammed error list will be displayed and exit intentionally
+# If no input is entered, the pre-programmed error list will be displayed and exit intentionally
 # Will then call split_ip
 # NO RETURNS
-
 get_ip() {
 
 	passed_ip="$1"
-	command="$2"
+	passed_command="$2"
 
 	if [[ -n "$passed_ip" ]]; then
-		ping_ip "$passed_ip" "$command"
+		ping_ip "$passed_ip" "passed_command"
 	fi
 
 	echo "Please enter Copier IP in the following format: 10.120.1.68"
@@ -38,8 +37,7 @@ get_ip() {
 	if [[ -z "$declared_ip" ]]; then
 		error_list
 	else
-		# echo "debug ip -- $declared_ip"
-		split_ip "$declared_ip" "$command"
+		split_ip "$declared_ip" "$passed_command"
 	fi
 }
 
@@ -49,7 +47,6 @@ get_ip() {
 # Returns:
 # 	True (0) if $1 (passed arg) is valid number (40)
 # 	False (1) if $1 is not a valid number (4O)
-
 is_valid_number() {
 	if [[ "$1" =~ ^[0-9]+$ ]]; then
 		return 0
@@ -62,16 +59,13 @@ is_valid_number() {
 # 	$1 = arg_1 and should be the IP address
 # 	$2 = arg_2 and should be the desired prescribe command
 # Splits IP into octets and checks each octet to see if it is valid
-# Will call preprogrammed error states if a flag is thrown, like too many or few octets or an invalid number
+# Will call pre-programmed error states if a flag is thrown, like too many or few octets or an invalid number
 # Will then call ping_ip
 # NO RETURNS
-
 split_ip() {
 
-	# echo "debug -- split_ip"
-
 	passed_ip="$1"
-	command="$2"
+	passed_command="$2"
 
 	local ip="$1"
 	local IFS="."
@@ -79,7 +73,6 @@ split_ip() {
 	declare -a ip_arr=()
 
 	read -ra ip_arr <<< "$passed_ip"
-	#echo "${ip_arr[0]}.${ip_arr[1]}.${ip_arr[2]}.${ip_arr[3]}"
 
 	if [ ${#ip_arr[@]} -lt 4 ]; then
 		error_exit "[IP_MISSING_OCTETS_ERROR]"
@@ -109,36 +102,30 @@ split_ip() {
 	fi
 
 	if [ $invalid_count -ge 1 ]; then
-		error_exit "[IP_OCTECT_BOUNDING_ERROR]"
+		error_exit "[IP_OCTET_BOUNDING_ERROR]"
 	fi
 
 	ip="${ip_arr[0]}.${ip_arr[1]}.${ip_arr[2]}.${ip_arr[3]}"
-	# echo "debugging assembled ip --$declared_ip"
-	ping_ip "$ip" "$command"
 
+	ping_ip "$ip" "$passed_command"
 }
 
 # Passed args
 # 	$1 = arg_1 and should be the IP address
 # 	$2 = arg_2 and should be the desired prescribe command
 # Pings the passed IP address to confirm a connection before sending the command to the device
-# Will call preprogrammed error states if a flag is thrown, like cannot ping device
+# Will call pre-programmed error states if a flag is thrown, like cannot ping device
 # Will then call nc_command if all is good
 # NO RETURNS
-
 ping_ip() {
 
-	# echo "debug -- ping_ip"
-
 	passed_ip="$1"
-	command="$2"
-
-	# echo "debugging passed_ip -- $passed_ip"
+	passed_command="$2"
 
 	ping -c 1 -W 1 "$passed_ip" > /dev/null 2>&1
 
 	if [ "$?" -eq 0 ]; then
-		nc_command "$passed_ip" "$command"
+		get_command "$passed_ip" "$passed_command"
 	else
 		error_exit "[PING_TEST_FAILED_ERROR]"
 	fi
@@ -149,154 +136,311 @@ ping_ip() {
 # Prints Command List for user to see and make a choice
 # Expects a num (int) and will throw intentional error if anything else is entered
 # Returns number (int) based on user choice in menu
-
 get_command() {
 
-	command=""
+  passed_ip="$1"
+  passed_command="$2"
 
-	echo "Command Options:"
-	echo "1 - Event Log"
-	echo "    prints Event Log"
-	echo "2 - 3 Tier Color"
-	echo "    enables 3 tiered color"
-	echo "3 - 60 Lines"
-	echo "    enables 60 lines mode"
-	echo "4 - Tray Switch"
-	echo "    turns off tray switching"
-	echo "5 - Sleep Timer"
-	echo "    turns off sleep timer"
+	user_choice=-999
 
-	echo "(enter 6 to display error list)"
-	read -r -p "Enter Menu Choice: " command
-	echo
+  command_dictionary=()
+  command_dictionary[1]="event_log"
+  command_dictionary[2]="tiered_color_on"
+  command_dictionary[3]="tiered_color_off"
+  command_dictionary[4]="60_lines"
+  command_dictionary[5]="66_lines"
+  command_dictionary[6]="tray_switch_on"
+  command_dictionary[7]="tray_switch_off"
+  command_dictionary[8]="sleep_timer_on"
+  command_dictionary[9]="sleep_timer_off"
+  command_dictionary[0]="print_error_list"
 
-	# echo "debugging command -- $command"
+  if [[ -z "$passed_command" ]]; then
 
-	if [ "$command" = 1 ]; then
-		return 1
-	elif [ "$command" = 2 ]; then
-		return 2
-	elif [ "$command" = 3 ]; then
-		return 3
-	elif [ "$command" = 4 ]; then
-		return 4
-	elif [ "$command" = 5 ]; then
-		return 5
-	elif [ "$command" = 6 ]; then
-		error_list
-	else
-		error_exit "[INVALID_COMMAND_ENTRY_ERROR]"
-	fi
+    echo "Command Options:"
+    echo "[ 1 ] - Event Log"
+    echo "[ 2 ] - Turn on 3 Tier Color"
+    echo "[ 3 ] - Turn off 3 Tier Color"
+    echo "[ 4 ] - Turn on 60 Lines Mode"
+    echo "[ 5 ] - Turn on 66 Lines Mode"
+    echo "[ 6 ] - Turn on Tray Switch"
+    echo "[ 7 ] - Turn off Tray Switch"
+    echo "[ 8 ] - Turn on Sleep Timer"
+    echo "[ 9 ] - Turn off Sleep Timer"
+    echo "[ 0 ] - Display Error Menu List"
+
+    echo "(enter 6 to display error list)"
+    read -r -p "Enter Menu Choice: " user_choice
+    echo
+  fi
+
+  if [[ "$user_choice" == -999 ]]; then
+    for i in "${!command_dictionary[@]}"; do
+      if [[ "${command_dictionary[$i]}" == "$passed_command" ]]; then
+        user_choice=$i
+      fi
+    done
+  fi
+
+	if [[ "$user_choice" == 1 ]]; then
+    event_log "$passed_ip"
+  elif [[ "$user_choice" == 2 || "$user_choice" == 3 ]]; then
+    toggle_tiered_color "$passed_ip" "$user_choice"
+  elif [[ "$user_choice" == 4 || "$user_choice" == 5 ]]; then
+    toggle_line_mode "$passed_ip" "$user_choice"
+  elif [[ "$user_choice" == 6 || "$user_choice" == 7 ]]; then
+    toggle_tray_switch "$passed_ip" "$user_choice"
+  elif [[ "$user_choice" == 8 || "$user_choice" == 9 ]]; then
+    toggle_sleep_timer "$passed_ip" "$user_choice"
+  elif [[ "$user_choice" == 0 ]]; then
+    error_list
+  else
+    error_exit "[INVALID_COMMAND_ENTRY_ERROR]"
+  fi
 }
 
 # Passed args
 # 	$1 = arg_1 and should be the IP address
 # 	$2 = arg_2 and should be the desired prescribe command
-# If $2 is empty, will prompt user to enter command via get_command function
-# Will check if prescribe command .txt files exist, if not will create it
-# Will then send the prescribe command to device via the NetCat command
+# Will create command file if needed
+# Prints out the machines event log
+# Uses netcat to send the command via IP address
 # NO RETURNS
+event_log() {
+  passed_ip="$1"
+  dir_path="$HOME/Kyocera_commands"
+  file_path="$HOME/Kyocera_commands/event_log.txt"
 
-nc_command() {
+  if [[ ! -f "$file_path" ]]; then
+    if [[ ! -f "$dir_path" ]]; then
+      mkdir -p "$dir_path"
+    fi
+    printf "!R!KCFG\"ELOG\";EXIT;" > "$file_path"
+  fi
 
-	passed_ip="$1"
-	command="$2"
+  if which nc &>/dev/null; then
+    nc "$passed_ip" < "$file_path"
+  else
+    error_exit "[NC_NOT_INSTALLED_ERROR]"
+  fi
 
-	dir_path="$HOME/Kyocera_Commands"
-	prescribe_command=""
+  echo ""
+  echo "Sent command to copier/printer. Press any key to exit..."
+  read -nr 1 -s
+  exit 1
+}
 
-	# echo "debug -- nc_command"
+# Passed args
+# 	$1 = arg_1 and should be the IP address
+# 	$2 = arg_2 and should be the desired prescribe command
+# Will create command file if needed
+# Toggles sleep timer ON/OFF
+# When turning ON 3 tiered color
+#   Uses the following 'default' structure where
+#   Level 1 = 0-2% color, Level 2 = 2-5% color, and Level 3 = 6+% color
+# Uses netcat to send the command via IP address
+# NO RETURNS
+toggle_tiered_color() {
+  passed_ip="$1"
+  dir_path="$HOME/Kyocera_commands"
+  file_path_on="$HOME/Kyocera_commands/3_tier_on.txt"
+  file_path_off="$HOME/Kyocera_commands/3_tier_off.txt"
 
-	if [[ -z "$command" ]]; then
-		get_command
-		command="$?"
-	fi
+  if [[ "$2" == 2 ]]; then
+    if [[ ! -f "$file_path" ]]; then
+      if [[ ! -f "$dir_path" ]]; then
+        mkdir -p "$dir_path"
+      fi
+      printf "!R!KCFG\"TCCM\",1;\n" > "$file_path_on"
+      printf "!R!KCFG\"STCT\",1,20;\n" >> "$file_path_on"
+      printf "!R!KCFG\"STCT\",2,50;EXIT;" >> "$file_path_on"
+    fi
+    if which nc &>/dev/null; then
+      nc "$passed_ip" < "$file_path_on"
+    else
+      error_exit "[NC_NOT_INSTALLED_ERROR]"
+    fi
+  elif [[ "$2" == 3 ]]; then
+    if [[ ! -f "$file_path" ]]; then
+      if [[ ! -f "$dir_path" ]]; then
+        mkdir -p "$dir_path"
+      fi
+      printf "!R!KCFG\"TCCM\",0;EXIT;" > "$file_path_off"
+    fi
+    if which nc &>/dev/null; then
+      nc "$passed_ip" < "$file_path_off"
+    else
+      error_exit "[NC_NOT_INSTALLED_ERROR]"
+    fi
+  fi
 
-	if [[ "$command" =~ ^[0-9]+$ ]]; then
-		# echo "command_num"
-		command_num="$command"
-	else
-		# echo "command_str"
-		command_str="$command"
-	fi
+  echo ""
+  echo "Sent command to copier/printer. Press any key to exit..."
+  read -nr 1 -s
+  exit 1
+}
 
-	if [[ "$command_str" = "event_log" || "$command_num" -eq 1 ]]; then
-		# echo "debugging -- option 1"
-		file_path="$HOME/Kyocera_Commands/event_log.txt"
-		prescribe_command="!R!KCFG\"ELOG\";EXIT;"
+# Passed args
+# 	$1 = arg_1 and should be the IP address
+# 	$2 = arg_2 and should be the desired prescribe command
+# Will create command file if needed
+# Toggles line mode between 60/66 lines a page
+# Uses netcat to send the command via IP address
+# NO RETURNS
+toggle_line_mode() {
+  passed_ip="$1"
+  dir_path="$HOME/Kyocera_commands"
+  file_path_60="$HOME/Kyocera_commands/60_line_mode.txt"
+  file_path_66="$HOME/Kyocera_commands/66_line_mode.txt"
 
-	elif [[ "$command_str" = "3_tier_color" || "$command_num" -eq 2 ]]; then
-		# echo "debugging -- poption 2"
-		file_path="$HOME/Kyocera_Commands/3_tier_color.txt"
-		prescribe_command="!R!KCFG\"TCCM\",1;EXIT;"
+  if [[ "$2" == 4 ]]; then
+    if [[ ! -f "$file_path" ]]; then
+      if [[ ! -f "$dir_path" ]]; then
+        mkdir -p "$dir_path"
+      fi
+      printf "!R! FRPO U0,6; FRPO U1,60; EXIT;" > "$file_path_60"
+    fi
+    if which nc &>/dev/null; then
+      nc "$passed_ip" < "$file_path_60"
+    else
+      error_exit "[NC_NOT_INSTALLED_ERROR]"
+    fi
+  elif [[ "$2" == 5 ]]; then
+    if [[ ! -f "$file_path" ]]; then
+      if [[ ! -f "$dir_path" ]]; then
+        mkdir -p "$dir_path"
+      fi
+      printf "!R! FRPO U0,6; FRPO U1,66; EXIT;" > "$file_path_66"
+    fi
+    if which nc &>/dev/null; then
+      nc "$passed_ip" < "$file_path_66"
+    else
+      error_exit "[NC_NOT_INSTALLED_ERROR]"
+    fi
+  fi
 
-	elif [[ "$command_str" = "60_lines" || "$command_num" -eq 3 ]]; then
-		# echo "debugging -- option 3"
-		file_path="$HOME/Kyocera_Commands/60_lines.txt"
-		prescribe_command="!R! FRPO U0,6; FRPO U1,60; EXIT;"
+  echo ""
+  echo "Sent command to copier/printer. Press any key to exit..."
+  read -nr 1 -s
+  exit 1
+}
 
-	elif [[ "$command_str" = "no_tray_switch" || "$command_num" -eq 4 ]]; then
-		# echo "debugging -- option 4"
-		file_path="$HOME/Kyocera_Commands/no_tray_switch.txt"
-		prescribe_command="!R! FRPO A2,10; EXIT;"
+# Passed args
+# 	$1 = arg_1 and should be the IP address
+# 	$2 = arg_2 and should be the desired prescribe command
+# Will create command file if needed
+# Toggles tray switch ON/OFF
+# Uses netcat to send the command via IP address
+# NO RETURNS
+toggle_tray_switch() {
+  passed_ip="$1"
+  dir_path="$HOME/Kyocera_commands"
+  file_path_on="$HOME/Kyocera_commands/tray_switch_on.txt"
+  file_path_off="$HOME/Kyocera_commands/tray_switch_off.txt"
 
-	elif [[ "$command_str" = "sleep_timer" || "$command_num" -eq 5 ]]; then
-		# echo "debugging -- option 5"
-		file_path="$HOME/Kyocera_Commands/sleep_timer.txt"
-		prescribe_command="!R! FRPO N5,0; EXIT;"
+  if [[ "$2" == 6 ]]; then
+    if [[ ! -f "$file_path" ]]; then
+      if [[ ! -f "$dir_path" ]]; then
+        mkdir -p "$dir_path"
+      fi
+      printf "!R! FRPO A2,10; EXIT;" > "$file_path_on" # NEEDS edit
+    fi
+    if which nc &>/dev/null; then
+      nc "$passed_ip" < "$file_path_on"
+    else
+      error_exit "[NC_NOT_INSTALLED_ERROR]"
+    fi
+  elif [[ "$2" == 7 ]]; then
+    if [[ ! -f "$file_path" ]]; then
+      if [[ ! -f "$dir_path" ]]; then
+        mkdir -p "$dir_path"
+      fi
+      printf "!R! FRPO A2,10; EXIT;" > "$file_path_off"
+    fi
+    if which nc &>/dev/null; then
+      nc "$passed_ip" < "$file_path_off"
+    else
+      error_exit "[NC_NOT_INSTALLED_ERROR]"
+    fi
+  fi
 
-	else
-		error_exit "[INVALID_COMMAND_ENTRY_ERROR]"
-	fi
+  echo ""
+  echo "Sent command to copier/printer. Press any key to exit..."
+  read -nr 1 -s
+  exit 1
+}
 
-	# echo "debugging -- path set and command set"
+# Passed args
+# 	$1 = arg_1 and should be the IP address
+# 	$2 = arg_2 and should be the desired prescribe command
+# Will create command file if needed
+# Toggles sleep timer ON/OFF
+# Uses netcat to send the command via IP address
+# NO RETURNS
+toggle_sleep_timer() {
+  passed_ip="$1"
+  dir_path="$HOME/Kyocera_commands"
+  file_path_on="$HOME/Kyocera_commands/sleep_timer_on.txt"
+  file_path_off="$HOME/Kyocera_commands/sleep_timer_off.txt"
 
-	if [ ! -f "$file_path" ]; then
-		if [ ! -d "$dir_path" ]; then
-			mkdir -p "$dir_path"
-		fi
-		echo -ne "$prescribe_command" > "$file_path"
-	fi
+  if [[ "$2" == 8 ]]; then
+    if [[ ! -f "$file_path" ]]; then
+      if [[ ! -f "$dir_path" ]]; then
+        mkdir -p "$dir_path"
+      fi
+      printf "!R! FRPO N5,0; EXIT;" > "$file_path_on" # NEED edit
+    fi
+    if which nc &>/dev/null; then
+      nc "$passed_ip" < "$file_path_on"
+    else
+      error_exit "[NC_NOT_INSTALLED_ERROR]"
+    fi
+  elif [[ "$2" == 9 ]]; then
+    if [[ ! -f "$file_path" ]]; then
+      if [[ ! -f "$dir_path" ]]; then
+        mkdir -p "$dir_path"
+      fi
+      printf "!R! FRPO N5,0; EXIT;" > "$file_path_off"
+    fi
+    if which nc &>/dev/null; then
+      nc "$passed_ip" < "$file_path_off"
+    else
+      error_exit "[NC_NOT_INSTALLED_ERROR]"
+    fi
+  fi
 
-	# echo "debugging -- file exists or has been created"
+  echo ""
+  echo "Sent command to copier/printer. Press any key to exit..."
+  read -nr 1 -s
+  exit 1
+}
 
-	if command -v nc >/dev/null 2>&1; then
-		echo ""
-		echo "Sending command to printer now..."
-		nc -w 5 -q 0 "$passed_ip" 9100 < "$file_path"
-	else
-		error_exit "[NC_NOT_INSTALLED_ERROR]"
-	fi
-
-	echo ""
-	echo "Sent command to copier/printer. Press any key to exit..."
-	read -nr 1 -s
+# Passed args
+#   $1 = whatever pre-programmed error code happened
+# Will let the user know that an intentional error state happened
+# Will also print out the programmed error code
+# NO RETURNS
+error_exit() {
+  exit_condition=""
+	echo
+	read -r -p "$1. Press any key to exit..." exit_condition
 	exit 1
 }
 
 # NO PASSED ARGS
-# Will let the user know that an intentional error state happened
-# Will also print out the programmed error code
+# Lets the user know that runtime was successful
+# Currently Unused (used during testing)
 # NO RETURNS
-
-error_exit() {
-	echo
-	echo "$1. Press any key to exit..."
-	read -nr 1 -s
-	exit 1
-}
-
 safe_exit() {
+  exit_condition=""
 	echo
-	echo "Runtime success. Press any key to exit..."
-  read -nr 1 -s
+  read -r -p "Runtime success. Press any key to exit..." exit_condition
 	exit 1
 }
 
 # NO PASSED ARGS
 # Prints out all pre-programmed error codes, description, and an example or two
 # NO RETURNS
-
 error_list() {
 	echo
 	echo "ERROR_CODE: IP_MISSING_OCTETS_ERROR"
@@ -311,7 +455,7 @@ error_list() {
 	echo "DESCRIPTION: The IP address contains an invalid octet."
 	echo "EXAMPLE: 192.16i.1.25"
 	echo
-	echo "ERROR_CODE: IP_OCTECT_BOUNDING_ERROR"
+	echo "ERROR_CODE: IP_OCTET_BOUNDING_ERROR"
 	echo "DESCRIPTION: The IP address contains an invalid octet."
 	echo "EXAMPLE: 192.1680.1.25"
 	echo
@@ -331,8 +475,8 @@ error_list() {
 	echo "DESCRIPTION: A process error with Command Line Interface (CLI) arguments was detected and could not be handled."
 	echo "Please review arguments and try again. If error persists, please contact with author of the script."
 	echo
-	echo "Press any key to exit..."
-	read -nr 1 -s
+	exit_condition=""
+	read -r -p "Press any key to exit..." exit_condition
 	exit 1
 }
 

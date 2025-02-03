@@ -195,11 +195,10 @@ get_command() {
 # Passed args
 # 	$1 = arg_1 and should be the IP address
 # 	$2 = arg_2 and should be the desired prescribe command
-# If $2 is empty, will prompt user to enter command via get_command function
-# Will check if prescribe command .txt files exist, if not will create it
-# Will then send the prescribe command to device via the NetCat command
+# Will create command file if needed
+# Prints out the machines event log
+# Uses netcat to send the command via IP address
 # NO RETURNS
-
 event_log() {
   passed_ip="$1"
   dir_path="$HOME/Kyocera_commands"
@@ -217,9 +216,18 @@ event_log() {
   else
     error_exit "[NC_NOT_INSTALLED_ERROR]"
   fi
-
 }
 
+# Passed args
+# 	$1 = arg_1 and should be the IP address
+# 	$2 = arg_2 and should be the desired prescribe command
+# Will create command file if needed
+# Toggles sleep timer ON/OFF
+# When turning ON 3 tiered color
+#   Uses the following 'default' structure where
+#   Level 1 = 0-2% color, Level 2 = 2-5% color, and Level 3 = 6+% color
+# Uses netcat to send the command via IP address
+# NO RETURNS
 toggle_tiered_color() {
   passed_ip="$1"
   dir_path="$HOME/Kyocera_commands"
@@ -254,6 +262,14 @@ toggle_tiered_color() {
     fi
   fi
 }
+
+# Passed args
+# 	$1 = arg_1 and should be the IP address
+# 	$2 = arg_2 and should be the desired prescribe command
+# Will create command file if needed
+# Toggles line mode between 60/66 lines a page
+# Uses netcat to send the command via IP address
+# NO RETURNS
 toggle_line_mode() {
   passed_ip="$1"
   dir_path="$HOME/Kyocera_commands"
@@ -286,13 +302,21 @@ toggle_line_mode() {
     fi
   fi
 }
+
+# Passed args
+# 	$1 = arg_1 and should be the IP address
+# 	$2 = arg_2 and should be the desired prescribe command
+# Will create command file if needed
+# Toggles tray switch ON/OFF
+# Uses netcat to send the command via IP address
+# NO RETURNS
 toggle_tray_switch() {
   passed_ip="$1"
   dir_path="$HOME/Kyocera_commands"
   file_path_on="$HOME/Kyocera_commands/tray_switch_on.txt"
   file_path_off="$HOME/Kyocera_commands/tray_switch_off.txt"
 
-  if [[ "$2" == 7 ]]; then
+  if [[ "$2" == 6 ]]; then
     if [[ ! -f "$file_path" ]]; then
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
@@ -304,7 +328,7 @@ toggle_tray_switch() {
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
-  elif [[ "$2" == 8 ]]; then
+  elif [[ "$2" == 7 ]]; then
     if [[ ! -f "$file_path" ]]; then
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
@@ -318,6 +342,14 @@ toggle_tray_switch() {
     fi
   fi
 }
+
+# Passed args
+# 	$1 = arg_1 and should be the IP address
+# 	$2 = arg_2 and should be the desired prescribe command
+# Will create command file if needed
+# Toggles sleep timer ON/OFF
+# Uses netcat to send the command via IP address
+# NO RETURNS
 toggle_sleep_timer() {
   passed_ip="$1"
   dir_path="$HOME/Kyocera_commands"
@@ -351,7 +383,8 @@ toggle_sleep_timer() {
   fi
 }
 
-# NO PASSED ARGS
+# Passed args
+#   $1 = whatever pre-programmed error code happened
 # Will let the user know that an intentional error state happened
 # Will also print out the programmed error code
 # NO RETURNS
@@ -364,7 +397,8 @@ error_exit() {
 }
 
 # NO PASSED ARGS
-# Intentional exit, program was successful
+# Lets the user know that runtime was successful
+# Currently Unused (used during testing)
 # NO RETURNS
 
 safe_exit() {
