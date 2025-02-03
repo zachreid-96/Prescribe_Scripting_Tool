@@ -41,7 +41,6 @@ get_ip() {
 # Returns:
 # 	True (0) if $1 (passed arg) is valid number (40)
 # 	False (1) if $1 is not a valid number (4O)
-
 is_valid_number() {
 	if [[ "$1" =~ ^[0-9]+$ ]]; then
 		return 0
@@ -54,10 +53,9 @@ is_valid_number() {
 # 	$1 = arg_1 and should be the IP address
 # 	$2 = arg_2 and should be the desired prescribe command
 # Splits IP into octets and checks each octet to see if it is valid
-# Will call preprogrammed error states if a flag is thrown, like too many or few octets or an invalid number
+# Will call pre-programmed error states if a flag is thrown, like too many or few octets or an invalid number
 # Will then call ping_ip
 # NO RETURNS
-
 split_ip() {
   echo "Split_IP --- start"
 	passed_ip="$1"
@@ -108,10 +106,9 @@ split_ip() {
 # 	$1 = arg_1 and should be the IP address
 # 	$2 = arg_2 and should be the desired prescribe command
 # Pings the passed IP address to confirm a connection before sending the command to the device
-# Will call preprogrammed error states if a flag is thrown, like cannot ping device
+# Will call pre-programmed error states if a flag is thrown, like cannot ping device
 # Will then call nc_command if all is good
 # NO RETURNS
-
 ping_ip() {
 
 	passed_ip="$1"
@@ -131,7 +128,6 @@ ping_ip() {
 # Prints Command List for user to see and make a choice
 # Expects a num (int) and will throw intentional error if anything else is entered
 # Returns number (int) based on user choice in menu
-
 get_command() {
 
 	passed_ip="$1"

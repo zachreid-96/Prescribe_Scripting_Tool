@@ -169,7 +169,7 @@ get_command() {
     echo "[ 9 ] - Turn off Sleep Timer"
     echo "[ 0 ] - Display Error Menu List"
 
-    echo "(enter 6 to display error list)"
+    echo ""
     read -r -p "Enter Menu Choice: " user_choice
     echo
   fi
