@@ -3,8 +3,16 @@ import sys
 import subprocess
 import platform
 import os
+import re
 
 
+# Passed args
+# 	passed_ip = ip and should be the IP address
+# 	passed_command = command and should be the desired prescribe command
+# Gets the IP address from the user. Specifically the IP of the copier/printer
+# If no input is entered, the pre-programmed error list will be displayed and exit intentionally
+# Will then call split_ip
+# NO RETURNS
 def get_ip(ip, command):
     passed_ip = ip
     passed_command = command
@@ -25,6 +33,13 @@ def get_ip(ip, command):
         split_ip(machine_ip, passed_command)
 
 
+# Passed args
+# 	passed_ip = ip and should be the IP address
+# 	passed_command = command and should be the desired prescribe command
+# Splits IP into octets and checks each octet to see if it is valid
+# Will call pre-programmed error states if a flag is thrown, like too many or few octets or an invalid number
+# Will then call ping_ip
+# NO RETURNS
 def split_ip(ip, command):
     passed_ip = ip
     passed_command = command
@@ -57,6 +72,13 @@ def split_ip(ip, command):
             error_exit("[IP_MISSING_OCTETS_ERROR]")
 
 
+# Passed args
+# 	passed_ip = ip and should be the IP address
+# 	passed_command = command and should be the desired prescribe command
+# Pings the passed IP address to confirm a connection before sending the command to the device
+# Will call pre-programmed error states if a flag is thrown, like cannot ping device
+# Will then call nc_command if all is good
+# NO RETURNS
 def ping_ip(ip, command):
     passed_ip = ip
     passed_command = command
@@ -73,6 +95,12 @@ def ping_ip(ip, command):
         get_command(passed_command, passed_command)
 
 
+# Passed args
+# 	passed_ip = ip and should be the IP address
+# 	passed_command = command and should be the desired prescribe command
+# Prints Command List for user to see and make a choice
+# Expects a num (int) and will throw intentional error if anything else is entered
+# Returns number (int) based on user choice in menu
 def get_command(ip, command):
     passed_ip = ip
     passed_command = command
@@ -131,6 +159,11 @@ def get_command(ip, command):
     error_exit("[INVALID_COMMAND_ENTRY_ERROR]")
 
 
+# Passed args
+# 	passed_ip = ip and should be the IP address
+# Will create command file if needed
+# Prints out the machines event log
+# NO RETURNS
 def event_log(ip):
     try:
         file_path = os.path.join(os.environ['USERPROFILE'], 'Kyocera_commands', 'event_log.txt')
@@ -144,6 +177,15 @@ def event_log(ip):
     send_lpr_command(ip, file_path)
 
 
+# Passed args
+# 	passed_ip = ip and should be the IP address
+# 	passed_command = command and should be the desired prescribe command
+# Will create command file if needed
+# Toggles sleep timer ON/OFF
+# When turning ON 3 tiered color
+#   Uses the following 'default' structure where
+#   Level 1 = 0-2% color, Level 2 = 2-5% color, and Level 3 = 6+% color
+# NO RETURNS
 def toggle_tiered_color(ip, command):
     try:
         file_path_on = os.path.join(os.environ['USERPROFILE'], 'Kyocera_commands', '3_tier_on.txt')
@@ -167,6 +209,12 @@ def toggle_tiered_color(ip, command):
         send_lpr_command(ip, file_path_off)
 
 
+# Passed args
+# 	passed_ip = ip and should be the IP address
+# 	passed_command = command and should be the desired prescribe command
+# Will create command file if needed
+# Toggles line mode between 60/66 lines a page
+# NO RETURNS
 def toggle_line_mode(ip, command):
     try:
         file_path_60 = os.path.join(os.environ['USERPROFILE'], 'Kyocera_commands', 'file_path_60.txt')
@@ -188,6 +236,12 @@ def toggle_line_mode(ip, command):
         send_lpr_command(ip, file_path_66)
 
 
+# Passed args
+# 	passed_ip = ip and should be the IP address
+# 	passed_command = command and should be the desired prescribe command
+# Will create command file if needed
+# Toggles tray switch ON/OFF
+# NO RETURNS
 def toggle_tray_switch(ip, command):
     try:
         tray_switch_on = os.path.join(os.environ['USERPROFILE'], 'Kyocera_commands', 'tray_switch_on.txt')
@@ -199,7 +253,7 @@ def toggle_tray_switch(ip, command):
     if command == "2":
         if not os.path.exists(tray_switch_on):
             with open(tray_switch_on, 'w') as f:
-                f.write('!R! FRPO A2,10; EXIT;') # NEED edit
+                f.write('!R! FRPO A2,10; EXIT;')  # NEED edit
         send_lpr_command(ip, tray_switch_on)
 
     elif command == "3":
@@ -209,6 +263,13 @@ def toggle_tray_switch(ip, command):
         send_lpr_command(ip, tray_switch_off)
 
 
+# Passed args
+# 	passed_ip = ip and should be the IP address
+# 	passed_command = command and should be the desired prescribe command
+# Will create command file if needed
+# Toggles sleep timer ON/OFF
+# Toggle ON sets Sleep Timer to 5 minutes
+# NO RETURNS
 def toggle_sleep_timer(ip, command):
     try:
         sleep_timer_on = os.path.join(os.environ['USERPROFILE'], 'Kyocera_commands', 'sleep_timer_on.txt')
@@ -220,7 +281,7 @@ def toggle_sleep_timer(ip, command):
     if command == "2":
         if not os.path.exists(sleep_timer_on):
             with open(sleep_timer_on, 'w') as f:
-                f.write('!R! FRPO N5,0; EXIT;') # NEED edit
+                f.write('!R! FRPO N5,1; EXIT;')
         send_lpr_command(ip, sleep_timer_on)
 
     elif command == "3":
@@ -230,8 +291,13 @@ def toggle_sleep_timer(ip, command):
         send_lpr_command(ip, sleep_timer_off)
 
 
+# Passed args
+# 	ip = ip of the device
+# 	command = the desired prescribe command .txt file path
+# First checks if LPS is enabled and ready to use in both windows and unix/macos systems
+# Uses LPR to send the command to the machine
+# NO RETURNS
 def send_lpr_command(ip, command):
-
     system = platform.system().lower()
     if system == 'windows':
         try:
@@ -248,6 +314,11 @@ def send_lpr_command(ip, command):
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
+# Passed args
+#   err_condition = whatever pre-programmed error code happened
+# Will let the user know that an intentional error state happened
+# Will also print out the programmed error code
+# NO RETURNS
 def error_exit(err_condition):
     try:
         input = raw_input
@@ -259,7 +330,16 @@ def error_exit(err_condition):
     exit()
 
 
+# NO PASSED ARGS
+# Prints out all pre-programmed error codes, description, and an example or two
+# NO RETURNS
 def error_list():
+
+    try:
+        input = raw_input
+    except NameError:
+        pass
+
     print("")
     print("ERROR_CODE: IP_MISSING_OCTETS_ERROR")
     print("DESCRIPTION: The IP address is missing one or more octets.")
@@ -302,10 +382,104 @@ def error_list():
 if __name__ == "__main__":
 
     declared_ip = "0.0.0.0"
-    print(len(sys.argv), sys.argv)
-    if len(sys.argv) == 1:
-        get_ip("", "")
+
+    # Removes the file path of script from sys.argv
+    index = [i for i, s in enumerate(sys.argv) if "prescribe.py" in s]
+    sys.argv.pop(index[0])
+
+    # Logic to handle no arguments (args) passed, or a simple double click run of script
+    if len(sys.argv) == 0:
+        if declared_ip == "0.0.0.0":
+            get_ip("", "")
+        else:
+            ping_ip(declared_ip, "")
+
+    # Logic to handle one arg passed via CLI call
+    elif len(sys.argv) == 1:
+
+        pattern = r"^(?:\d{1,3}\.){3}\d{1,3}$"
+
+        # Checks is passed arg is in IP address format
+        if re.match(pattern, sys.argv[0]):
+            if (sys.argv[0] == declared_ip) and declared_ip != "0.0.0.0":
+                ping_ip(sys.argv[0], "")
+
+            # Checks is passed ip matches declared ip (if applicable)
+            elif (sys.argv[0] != declared_ip) and declared_ip != "0.0.0.0":
+                print()
+                print("Passed IP does not match Defined IP\n")
+                print("Enter (Y) to continue with Passed IP: {0}".format(sys.argv[0]))
+                print("Enter (N) to continue with Defined IP: {0}\n".format(declared_ip))
+                choice = input("Your choice (Y/N): ")
+
+                if choice.lower() == "y":
+                    ping_ip(sys.argv[0], "")
+                elif choice.lower() == "n":
+                    ping_ip(declared_ip, "")
+                else:
+                    error_exit("[IP_MISMATCH_ERROR]")
+        # Assumes passed arg is command
+        # Will get IP unless a declared_ip is defined
+        else:
+            if declared_ip == "0.0.0.0":
+                get_ip("", sys.argv[0])
+            elif declared_ip != "0.0.0.0":
+                ping_ip(declared_ip, sys.argv[0])
+
+            # Failsafe if args cannot be parsed or processed correctly
+            else:
+                error_exit("[CLI_INVALID_ARGUMENTS_ERROR]")
+
+    # Logic to handle 2 passed args via CLI call
     elif len(sys.argv) == 2:
-        pass
-    elif len(sys.argv) == 3:
-        pass
+        pattern = r"^(?:\d{1,3}\.){3}\d{1,3}$"
+
+        # Checks is first passed arg is in IP address format
+        # Assumes [0] is IP and [1] is command
+        if re.match(pattern, sys.argv[0]):
+            if (sys.argv[0] == declared_ip) and declared_ip != "0.0.0.0":
+                ping_ip(sys.argv[0], "")
+
+            # Checks is passed ip matches declared ip (if applicable)
+            elif (sys.argv[0] != declared_ip) and declared_ip != "0.0.0.0":
+                print()
+                print("Passed IP does not match Defined IP\n")
+                print("Enter (Y) to continue with Passed IP: {0}".format(sys.argv[0]))
+                print("Enter (N) to continue with Defined IP: {0}\n".format(declared_ip))
+                choice = input("Your choice (Y/N): ")
+
+                if choice.lower() == "y":
+                    ping_ip(sys.argv[0], sys.argv[1])
+                elif choice.lower() == "n":
+                    ping_ip(declared_ip, sys.argv[1])
+                else:
+                    error_exit("[IP_MISMATCH_ERROR]")
+
+        # Checks is second passed arg is in IP address format
+        # Assumes [0] is command and [1] is IP
+        elif re.match(pattern, sys.argv[1]):
+            if (sys.argv[1] == declared_ip) and declared_ip != "0.0.0.0":
+                ping_ip(sys.argv[1], sys.argv[0])
+
+            # Checks is passed ip matches declared ip (if applicable)
+            elif (sys.argv[1] != declared_ip) and declared_ip != "0.0.0.0":
+                print()
+                print("Passed IP does not match Defined IP\n")
+                print("Enter (Y) to continue with Passed IP: {0}".format(sys.argv[0]))
+                print("Enter (N) to continue with Defined IP: {0}\n".format(declared_ip))
+                choice = input("Your choice (Y/N): ")
+
+                if choice.lower() == "y":
+                    ping_ip(sys.argv[1], sys.argv[0])
+                elif choice.lower() == "n":
+                    ping_ip(declared_ip, sys.argv[0])
+                else:
+                    error_exit("[IP_MISMATCH_ERROR]")
+
+        # Failsafe if args cannot be parsed or processed correctly
+        else:
+            error_exit("[CLI_INVALID_ARGUMENTS_ERROR]")
+
+    # Failsafe if args cannot be parsed or processed correctly
+    else:
+        error_exit("[CLI_INVALID_ARGUMENTS_ERROR]")

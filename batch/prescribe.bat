@@ -350,7 +350,7 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
         if not exist "!file_path!" (
             (
                 :: echo | set /p="!R! FRPO N5,0; EXIT;">"!file_path!" Needs Editing
-                echo | set /p="!R! FRPO N5,0; EXIT;">"!file_path!"
+                echo | set /p="!R! FRPO N5,1; EXIT;">"!file_path!"
             )
         )
     ) else (
@@ -384,9 +384,8 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 		echo   Restart Device
 		call :error_exit "[LPR_NOT_ENABLED_ERROR]"
 	)
-	echo %passed_ip%
+
 	ping %passed_ip% -n 2 | findstr /i "Destination host unreachable."
-	echo %errorlevel%
 
 	if %ERRORLEVEL%==0 (
 		call :error_exit "[NO_PING_NETWORK_ERROR]"

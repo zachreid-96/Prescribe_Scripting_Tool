@@ -132,7 +132,9 @@ ping_ip() {
 
 }
 
-# NO PASSED ARGS
+# Passed args
+# 	$1 = arg_1 and should be the IP address
+# 	$2 = arg_2 and should be the desired prescribe command
 # Prints Command List for user to see and make a choice
 # Expects a num (int) and will throw intentional error if anything else is entered
 # Returns number (int) based on user choice in menu
@@ -201,7 +203,6 @@ get_command() {
 
 # Passed args
 # 	$1 = arg_1 and should be the IP address
-# 	$2 = arg_2 and should be the desired prescribe command
 # Will create command file if needed
 # Prints out the machines event log
 # Uses netcat to send the command via IP address
@@ -375,6 +376,7 @@ toggle_tray_switch() {
 # 	$2 = arg_2 and should be the desired prescribe command
 # Will create command file if needed
 # Toggles sleep timer ON/OFF
+# Toggle ON sets Sleep Timer to 5 minutes
 # Uses netcat to send the command via IP address
 # NO RETURNS
 toggle_sleep_timer() {
@@ -388,7 +390,7 @@ toggle_sleep_timer() {
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
       fi
-      printf "!R! FRPO N5,0; EXIT;" > "$file_path_on" # NEED edit
+      printf "!R! FRPO N5,1; EXIT;" > "$file_path_on"
     fi
     if which nc &>/dev/null; then
       nc "$passed_ip" < "$file_path_on"
@@ -524,7 +526,7 @@ elif [[ -n "$arg_1" && -z "$arg_2" ]]; then
 			case "$choice" in
 				[Yy]*) ping_ip "$arg_1" "$arg_2" ;;
 				[Nn]*) ping_ip "$declared_ip" "$arg_2" ;;
-				*) error_exit "IP_MISMATCH_ERROR" ;;
+				*) error_exit "[IP_MISMATCH_ERROR]" ;;
 			esac
 		else
 			ping_ip "$arg_1" "$arg_2"
@@ -559,7 +561,7 @@ elif [[ -n "$arg_1" && -n "$arg_2" ]]; then
 			case "$choice" in
 				[Yy]*) ping_ip "$arg_1" "$arg_2" ;;
 				[Nn]*) ping_ip "$declared_ip" "$arg_2" ;;
-				*) error_exit "IP_MISMATCH_ERROR" ;;
+				*) error_exit "[IP_MISMATCH_ERROR]" ;;
 			esac
 		else
 			ping_ip "$arg_1" "$arg_2"
@@ -584,7 +586,7 @@ elif [[ -n "$arg_1" && -n "$arg_2" ]]; then
 			case "$choice" in
 				[Yy]*) ping_ip "$arg_2" "$arg_1" ;;
 				[Nn]*) ping_ip "$declared_ip" "$arg_1" ;;
-				*) error_exit "IP_MISMATCH_ERROR" ;;
+				*) error_exit "[IP_MISMATCH_ERROR]" ;;
 			esac
 		else
 			ping_ip "$arg_2" "$arg_1"
@@ -594,7 +596,7 @@ elif [[ -n "$arg_1" && -n "$arg_2" ]]; then
 	else
 		echo ""
 		echo "Error in process: $arg_1 | $arg_2"
-		error_exit "CLI_INVALID_ARGUMENTS_ERROR"
+		error_exit "[CLI_INVALID_ARGUMENTS_ERROR]"
     fi
 fi
 
