@@ -339,6 +339,14 @@ toggle_tray_switch() {
   file_path_on="$HOME/Kyocera_commands/tray_switch_on.txt"
   file_path_off="$HOME/Kyocera_commands/tray_switch_off.txt"
 
+  not_configured=""
+  echo -ne "\033[1;36m"
+  echo ""
+  echo "Mode not currently enabled. Please contact code maintainer for help."
+  read -r -p "%F{cyan}Press any key to exit...%f" not_configured
+  echo -e "\033[0m"
+  exit 1
+
   if [[ "$2" == 6 ]]; then
     if [[ ! -f "$file_path" ]]; then
       if [[ ! -f "$dir_path" ]]; then
