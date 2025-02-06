@@ -219,15 +219,15 @@ event_log() {
     printf "!R!KCFG\"ELOG\";EXIT;" > "$file_path"
   fi
 
-  if which nc &>/dev/null; then
-    nc "$passed_ip" < "$file_path"
+  if which lpr &>/dev/null; then
+    lpr -H "${passed_ip}:9100" -o raw "$file_path" &> /dev/null &
   else
-    error_exit "[NC_NOT_INSTALLED_ERROR]"
+    error_exit "[LPR_NOT_INSTALLED_ERROR]"
   fi
 
   echo ""
-  echo "Sent command to copier/printer. Press any key to exit..."
-  read -nr 1 -s
+  read -r -p "Sent command to copier/printer. Press any key to exit..." exit_condition
+  echo -e "\033[0m"
   exit 1
 }
 
@@ -256,10 +256,10 @@ toggle_tiered_color() {
       printf "!R!KCFG\"STCT\",1,20;\n" >> "$file_path_on"
       printf "!R!KCFG\"STCT\",2,50;EXIT;" >> "$file_path_on"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_on"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_on" &> /dev/null &
     else
-      error_exit "[NC_NOT_INSTALLED_ERROR]"
+      error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   elif [[ "$2" == 3 ]]; then
     if [[ ! -f "$file_path" ]]; then
@@ -268,16 +268,16 @@ toggle_tiered_color() {
       fi
       printf "!R!KCFG\"TCCM\",0;EXIT;" > "$file_path_off"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_off"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_off" &> /dev/null &
     else
-      error_exit "[NC_NOT_INSTALLED_ERROR]"
+      error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   fi
 
   echo ""
-  echo "Sent command to copier/printer. Press any key to exit..."
-  read -nr 1 -s
+  read -r -p "Sent command to copier/printer. Press any key to exit..." exit_condition
+  echo -e "\033[0m"
   exit 1
 }
 
@@ -301,10 +301,10 @@ toggle_line_mode() {
       fi
       printf "!R! FRPO U0,6; FRPO U1,60; EXIT;" > "$file_path_60"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_60"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_60" &> /dev/null &
     else
-      error_exit "[NC_NOT_INSTALLED_ERROR]"
+      error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   elif [[ "$2" == 5 ]]; then
     if [[ ! -f "$file_path" ]]; then
@@ -313,16 +313,16 @@ toggle_line_mode() {
       fi
       printf "!R! FRPO U0,6; FRPO U1,66; EXIT;" > "$file_path_66"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_66"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_66" &> /dev/null &
     else
-      error_exit "[NC_NOT_INSTALLED_ERROR]"
+      error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   fi
 
   echo ""
-  echo "Sent command to copier/printer. Press any key to exit..."
-  read -nr 1 -s
+  read -r -p "Sent command to copier/printer. Press any key to exit..." exit_condition
+  echo -e "\033[0m"
   exit 1
 }
 
@@ -346,10 +346,10 @@ toggle_tray_switch() {
       fi
       printf "!R! FRPO A2,10; EXIT;" > "$file_path_on" # NEEDS edit
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_on"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_on" &> /dev/null &
     else
-      error_exit "[NC_NOT_INSTALLED_ERROR]"
+      error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   elif [[ "$2" == 7 ]]; then
     if [[ ! -f "$file_path" ]]; then
@@ -358,16 +358,16 @@ toggle_tray_switch() {
       fi
       printf "!R! FRPO A2,10; EXIT;" > "$file_path_off"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_off"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_off" &> /dev/null &
     else
-      error_exit "[NC_NOT_INSTALLED_ERROR]"
+      error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   fi
 
   echo ""
-  echo "Sent command to copier/printer. Press any key to exit..."
-  read -nr 1 -s
+  read -r -p "Sent command to copier/printer. Press any key to exit..." exit_condition
+  echo -e "\033[0m"
   exit 1
 }
 
@@ -392,10 +392,10 @@ toggle_sleep_timer() {
       fi
       printf "!R! FRPO N5,1; EXIT;" > "$file_path_on"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_on"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_on" &> /dev/null &
     else
-      error_exit "[NC_NOT_INSTALLED_ERROR]"
+      error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   elif [[ "$2" == 9 ]]; then
     if [[ ! -f "$file_path" ]]; then
@@ -404,16 +404,17 @@ toggle_sleep_timer() {
       fi
       printf "!R! FRPO N5,0; EXIT;" > "$file_path_off"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_off"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_off" &> /dev/null &
     else
-      error_exit "[NC_NOT_INSTALLED_ERROR]"
+      error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   fi
 
+  exit_condition=""
   echo ""
-  echo "Sent command to copier/printer. Press any key to exit..."
-  read -nr 1 -s
+  read -r -p "Sent command to copier/printer. Press any key to exit..." exit_condition
+  echo -e "\033[0m"
   exit 1
 }
 
@@ -423,9 +424,32 @@ toggle_sleep_timer() {
 # Will also print out the programmed error code
 # NO RETURNS
 error_exit() {
+
+  if [[ $1 == "[LPR_NOT_INSTALLED_ERROR]" ]]; then
+    lpr_error_exit
+  fi
+
   exit_condition=""
 	echo
 	read -r -p "$1. Press any key to exit..." exit_condition
+	echo -e "\033[0m"
+	exit 1
+}
+
+# NO PASSED ARGS
+# Shows users how to install lpr onto workstation
+
+lpr_error_exit() {
+  echo
+  echo "How to install LPR in various OS environments"
+  echo "-macOS | brew install cups"
+  echo "-Ubuntu/Debian | sudo apt install cups-bsd"
+  echo "-Fedora/RHEL | sudo dnf install cups"
+  echo "-Windows | Enable LPR Port Monitor in Windows Features"
+  echo "-FreeBSD | pkg install cups"
+  echo
+  read -r -p "%F{cyan}Please install LPR (cups). Press any key to exit...%f" exit_condition
+	echo -e "\033[0m"
 	exit 1
 }
 
@@ -437,6 +461,7 @@ safe_exit() {
   exit_condition=""
 	echo
   read -r -p "Runtime success. Press any key to exit..." exit_condition
+  echo -e "\033[0m"
 	exit 1
 }
 
@@ -479,6 +504,7 @@ error_list() {
 	echo
 	exit_condition=""
 	read -r -p "Press any key to exit..." exit_condition
+	echo -e "\033[0m"
 	exit 1
 }
 
@@ -600,3 +626,5 @@ elif [[ -n "$arg_1" && -n "$arg_2" ]]; then
     fi
 fi
 
+echo -ne "\033[0m"
+exit 1

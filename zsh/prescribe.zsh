@@ -2,6 +2,11 @@
 
 declared_ip=""
 
+cyan="\033[1;36m"
+
+echo -ne "$cyan"
+echo -ne "\033]0;Kyocera Prescribe Command\007"
+
 # Passed args
 # 	$1 = arg_1 and should be the IP address
 # 	$2 = arg_2 and should be the desired prescribe command
@@ -25,7 +30,7 @@ get_ip() {
 	echo "Please enter the Copier's IP in the following format: 10.120.11.68"
 	echo "Or press enter to display error list"
 	echo
-	vared -p "Copier/Printer IP: " machine_ip
+	vared -p "%F{cyan}Copier/Printer IP: %f" machine_ip
 
 	if [[ -z "$machine_ip" ]]; then
 		error_list
@@ -167,7 +172,7 @@ get_command() {
 	fi
 
   if [[ "$user_choice" == -999 ]]; then
-    user_choice=command_dictionary["$passed_command"]
+    user_choice=$command_dictionary["$passed_command"]
   fi
 
 	if [[ "$user_choice" == 1 ]]; then
@@ -207,8 +212,8 @@ event_log() {
     printf "!R!KCFG\"ELOG\";EXIT;" > "$file_path"
   fi
 
-  if which nc &>/dev/null; then
-    nc "$passed_ip" < "$file_path"
+  if which lpr &>/dev/null; then
+    lpr -H "${passed_ip}:9100" -o raw "$file_path" &> /dev/null &
   else
     error_exit "[NC_NOT_INSTALLED_ERROR]"
   fi
@@ -239,8 +244,8 @@ toggle_tiered_color() {
       printf "!R!KCFG\"STCT\",1,20;\n" >> "$file_path_on"
       printf "!R!KCFG\"STCT\",2,50;EXIT;" >> "$file_path_on"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_on"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_on" &> /dev/null &
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
@@ -251,8 +256,8 @@ toggle_tiered_color() {
       fi
       printf "!R!KCFG\"TCCM\",0;EXIT;" > "$file_path_off"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_off"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_off" &> /dev/null &
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
@@ -279,8 +284,8 @@ toggle_line_mode() {
       fi
       printf "!R! FRPO U0,6; FRPO U1,60; EXIT;" > "$file_path_60"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_60"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_60" &> /dev/null &
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
@@ -291,8 +296,8 @@ toggle_line_mode() {
       fi
       printf "!R! FRPO U0,6; FRPO U1,66; EXIT;" > "$file_path_66"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_66"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_66" &> /dev/null &
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
@@ -312,6 +317,14 @@ toggle_tray_switch() {
   file_path_on="$HOME/Kyocera_commands/tray_switch_on.txt"
   file_path_off="$HOME/Kyocera_commands/tray_switch_off.txt"
 
+  not_configured=""
+  echo -ne "\033[1;36m"
+  echo ""
+  echo "Mode not currently enabled. Please contact code maintainer for help."
+  vared -p "%F{cyan}Press any key to exit...%f" not_configured
+  echo -e "\033[0m"
+  exit 1
+
   if [[ "$2" == 6 ]]; then
     if [[ ! -f "$file_path" ]]; then
       if [[ ! -f "$dir_path" ]]; then
@@ -319,8 +332,8 @@ toggle_tray_switch() {
       fi
       printf "!R! FRPO A2,10; EXIT;" > "$file_path_on" # NEEDS edit
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_on"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_on" &> /dev/null &
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
@@ -331,8 +344,8 @@ toggle_tray_switch() {
       fi
       printf "!R! FRPO A2,10; EXIT;" > "$file_path_off"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_off"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_off" &> /dev/null &
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
@@ -360,8 +373,8 @@ toggle_sleep_timer() {
       fi
       printf "!R! FRPO N5,1; EXIT;" > "$file_path_on"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_on"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_on" &> /dev/null &
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
@@ -372,8 +385,8 @@ toggle_sleep_timer() {
       fi
       printf "!R! FRPO N5,0; EXIT;" > "$file_path_off"
     fi
-    if which nc &>/dev/null; then
-      nc "$passed_ip" < "$file_path_off"
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_off" &> /dev/null &
     else
       error_exit "[NC_NOT_INSTALLED_ERROR]"
     fi
@@ -387,9 +400,32 @@ toggle_sleep_timer() {
 # NO RETURNS
 
 error_exit() {
+
+  if [[ $1 == "[LPR_NOT_INSTALLED_ERROR]" ]]; then
+    lpr_error_exit
+  fi
+
   exit_condition=""
 	echo
-	vared -p "$1. Press any key to exit..." exit_condition
+	vared -p "%F{cyan}${1}. Press any key to exit...%f" exit_condition
+	echo -e "\033[0m"
+	exit 1
+}
+
+# NO PASSED ARGS
+# Shows users how to install lpr onto workstation
+
+lpr_error_exit() {
+  echo
+  echo "How to install LPR in various OS environments"
+  echo "-macOS | brew install cups"
+  echo "-Ubuntu/Debian | sudo apt install cups-bsd"
+  echo "-Fedora/RHEL | sudo dnf install cups"
+  echo "-Windows | Enable LPR Port Monitor in Windows Features"
+  echo "-FreeBSD | pkg install cups"
+  echo
+  vared -p "%F{cyan}Please install LPR (cups). Press any key to exit...%f" exit_condition
+	echo -e "\033[0m"
 	exit 1
 }
 
@@ -401,7 +437,8 @@ error_exit() {
 safe_exit() {
   exit_condition=""
 	echo
-	vared -p "Runtime success. Press any key to exit..." exit_condition
+	vared -p "%F{cyan}Runtime success. Press any key to exit...%f" exit_condition
+	echo -e "\033[0m"
 	exit 1
 }
 
@@ -444,7 +481,8 @@ error_list() {
 	echo "DESCRIPTION: A process error with Command Line Interface (CLI) arguments was detected and could not be handled."
 	echo "Please review arguments and try again. If error persists, please contact with author of the script."
 	echo
-	vared -p "Press any key to exit..." exit_condition
+	vared -p "%F{cyan}Press any key to exit...%f" exit_condition
+	echo -e "\033[0m"
 	exit 1
 }
 
@@ -558,3 +596,5 @@ elif [[ -n "$arg_1" && -n "$arg_2" ]]; then
 	safe_exit
 fi
 
+echo -e "\033[0m"
+exit 1
