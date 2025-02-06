@@ -17,15 +17,13 @@ def get_ip(ip, command):
     passed_ip = ip
     passed_command = command
 
-    try:
-        input = raw_input
-    except NameError:
-        pass
-
     print("Please enter the Copier's IP in the following format: 10.120.11.68")
     print("Or press enter to display the error list")
     print("")
-    machine_ip = input("Copier/Printer IP: ")
+    try:
+        machine_ip = raw_input("Copier/Printer IP: ")
+    except NameError:
+        machine_ip = input("Copier/Printer IP: ")
 
     if machine_ip == "":
         error_list()
@@ -105,14 +103,9 @@ def get_command(ip, command):
     passed_ip = ip
     passed_command = command
 
-    try:
-        input = raw_input
-    except NameError:
-        pass
-
     user_choice = -99
     command_dictionary = []
-    command_dictionary.append("space_holder")
+    command_dictionary.append("print_error_list")
     command_dictionary.append("event_log")
     command_dictionary.append("tiered_color_on")
     command_dictionary.append("tiered_color_off")
@@ -122,7 +115,6 @@ def get_command(ip, command):
     command_dictionary.append("tray_switch_off")
     command_dictionary.append("sleep_timer_on")
     command_dictionary.append("sleep_timer_off")
-    command_dictionary.append("print_error_list")
 
     if passed_command == "":
         print("Command Options:")
@@ -138,8 +130,12 @@ def get_command(ip, command):
         print("[ 0 ] - Display Error Menu List")
 
         print("")
-        user_choice = input("Copier/Printer IP: ")
 
+        try:
+            user_choice = str(input("Enter Menu Choice: "))
+        except NameError:
+            user_choice = str(input("Enter Menu Choice: "))
+            
     if user_choice == -99:
         user_choice = str(command_dictionary.index(passed_command))
 
@@ -250,6 +246,15 @@ def toggle_tray_switch(ip, command):
         tray_switch_on = os.path.join(os.environ['HOME'], 'Kyocera_commands', 'tray_switch_on.txt')
         tray_switch_off = os.path.join(os.environ['HOME'], 'Kyocera_commands', 'tray_switch_off.txt')
 
+    print("")
+    print("Mode not currently enabled. Please contact code maintainer for help.")
+    try:
+        raw_input("Press any key to exit...")
+        exit()
+    except NameError:
+        input("Press any key to exit...")
+        exit()
+
     if command == "2":
         if not os.path.exists(tray_switch_on):
             with open(tray_switch_on, 'w') as f:
@@ -320,13 +325,11 @@ def send_lpr_command(ip, command):
 # Will also print out the programmed error code
 # NO RETURNS
 def error_exit(err_condition):
-    try:
-        input = raw_input
-    except NameError:
-        pass
-
     print("")
-    input("{0}. Press any key to exit...".format(err_condition))
+    try:
+        raw_input("{0}. Press any key to exit...".format(err_condition))
+    except NameError:
+        input("{0}. Press any key to exit...".format(err_condition))
     exit()
 
 
@@ -334,11 +337,6 @@ def error_exit(err_condition):
 # Prints out all pre-programmed error codes, description, and an example or two
 # NO RETURNS
 def error_list():
-
-    try:
-        input = raw_input
-    except NameError:
-        pass
 
     print("")
     print("ERROR_CODE: IP_MISSING_OCTETS_ERROR")
@@ -375,7 +373,10 @@ def error_list():
     print("Please review arguments and try again. If error persists, please contact with author of the script.")
     print("")
 
-    input("Press any key to exit...")
+    try:
+        raw_input("Press any key to exit...")
+    except NameError:
+        input("Press any key to exit...")
     exit()
 
 
@@ -410,7 +411,10 @@ if __name__ == "__main__":
                 print("Passed IP does not match Defined IP\n")
                 print("Enter (Y) to continue with Passed IP: {0}".format(sys.argv[0]))
                 print("Enter (N) to continue with Defined IP: {0}\n".format(declared_ip))
-                choice = input("Your choice (Y/N): ")
+                try:
+                    choice = raw_input("Your choice (Y/N): ")
+                except NameError:
+                    choice = input("Your choice (Y/N): ")
 
                 if choice.lower() == "y":
                     ping_ip(sys.argv[0], "")
@@ -446,7 +450,10 @@ if __name__ == "__main__":
                 print("Passed IP does not match Defined IP\n")
                 print("Enter (Y) to continue with Passed IP: {0}".format(sys.argv[0]))
                 print("Enter (N) to continue with Defined IP: {0}\n".format(declared_ip))
-                choice = input("Your choice (Y/N): ")
+                try:
+                    choice = raw_input("Your choice (Y/N): ")
+                except NameError:
+                    choice = input("Your choice (Y/N): ")
 
                 if choice.lower() == "y":
                     ping_ip(sys.argv[0], sys.argv[1])
@@ -467,7 +474,10 @@ if __name__ == "__main__":
                 print("Passed IP does not match Defined IP\n")
                 print("Enter (Y) to continue with Passed IP: {0}".format(sys.argv[0]))
                 print("Enter (N) to continue with Defined IP: {0}\n".format(declared_ip))
-                choice = input("Your choice (Y/N): ")
+                try:
+                    choice = raw_input("Your choice (Y/N): ")
+                except NameError:
+                    choice = input("Your choice (Y/N): ")
 
                 if choice.lower() == "y":
                     ping_ip(sys.argv[1], sys.argv[0])

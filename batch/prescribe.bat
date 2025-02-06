@@ -17,21 +17,23 @@ set "arg_2=%2"
 
 :: Handles double clicking the script or by calling it from the CLI
 
-if "%arg_1%"=="" if "%arg_2%"=="" (
+if "%arg_1%"=="" (
 
 	if not defined declared_ip (
 
 		call :get_ip "" ""
+		color
 		exit
 
 	) else (
 
 		call :get_ip "%declared_ip%" ""
+		color
 		exit
 	)
-	:: Handles CLI activation when args are passed
-) else not if "%arg_1%"=="" (
 
+) else (
+    :: Handles CLI activation when args are passed
 	echo %arg_1% | findstr /c:"." > nul
 
 	if %errorlevel% equ 0 (
@@ -39,11 +41,13 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 		if "%arg_2%"=="" (
 
 			call :get_ip "%arg_1%" ""
+			color
 			exit
 
 		) else (
 
 			call :get_ip "%arg_1%" "%arg_2%"
+			color
 			exit
 		)
 	) else (
@@ -51,11 +55,13 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 		if "%arg_2%"=="" (
 
 			call :get_ip "" "%arg_1%"
+			color
 			exit
 
 		) else (
 
 			call :get_ip "%arg_2%" "%arg_1%"
+			color
 			exit
 		)
 	)
@@ -70,6 +76,7 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 
 	if not "%passed_ip%"=="" (
 		call :verify_ip "%passed_ip%" "%passed_command%"
+		color
 		exit
 	)
 
@@ -84,10 +91,12 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 	:: If no IP is entered, a defualt 0.0.0.0 IP is set and the program will exit
 	if "%ip%"=="0.0.0.0" (
 		call :print_error_codes
+		color
 		exit
 	)
 	if not "%ip%"=="0.0.0.0" (
 		call :verify_ip "%ip%" "%passed_command%"
+		color
 		exit
 	)
 
@@ -119,6 +128,7 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 				call :validate_ip "%declared_ip%" "%passed_command%"
 			) else (
 				call :error_exit "[INVALID_IP_CHOICE_ERROR]"
+				color
 				exit
 			)
 		)
@@ -133,6 +143,7 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 		if "!t!"=="" (
 			if !pCount! neq 3 (
 				call :error_exit "[IP_MISSING_OCTET_ERROR]"
+				color
 				exit
 			)
 
@@ -171,6 +182,7 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 
 	if invalid_count==1 (
 		call :error_exit "[IP_INVALID_OCTET_ERROR]"
+		color
 		exit
 	)
 
@@ -178,9 +190,11 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 
 	if "%passed_command%"=="" (
 		call :get_command "!new_ip!" ""
+		color
 		exit
 	) else (
 		call :get_command "!new_ip!" "%passed_command%"
+		color
 		exit
 	)
 
@@ -208,7 +222,18 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
         echo [ 9 ] - Turn off Sleep Timer
         echo [ 0 ] - Display Error Menu List
 
-		set /p "command=Enter Menu Choice: " || set "command=99"
+		set /p "command=Enter Menu Choice: " || set command=0
+	) else (
+	    if "%passed_command%"=="print_error_list" ( set command=0 )
+        if "%passed_command%"=="event_log" ( set command=1 )
+        if "%passed_command%"=="tiered_color_on" ( set command=2 )
+        if "%passed_command%"=="tiered_color_off" ( set command=3 )
+        if "%passed_command%"=="60_lines" ( set command=4 )
+        if "%passed_command%"=="66_lines" ( set command=5 )
+        if "%passed_command%"=="tray_switch_on" ( set command=6 )
+        if "%passed_command%"=="tray_switch_off" ( set command=7 )
+        if "%passed_command%"=="sleep_timer_on" ( set command=8 )
+        if "%passed_command%"=="sleep_timer_off" ( set command=9 )
 	)
 
 	set "dir_path=%USERPROFILE%\Kyocera_Commands"
@@ -219,44 +244,30 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 
 	set match=0
 
-	if %command%==1 (set match=1)
-	if "%passed_command%"=="event_log" (set match=1)
+	if %command%==1 ( set match=1 )
+	if %command%==2 ( set match=2 )
+	if %command%==3 ( set match=3 )
+	if %command%==4 ( set match=4 )
+    if %command%==5 ( set match=5 )
+	if %command%==6 ( set match=6 )
+	if %command%==7 ( set match=7 )
+	if %command%==8 ( set match=8 )
+    if %command%==9 ( set match=9 )
+    if %command%==0 ( set match=0 )
 
-	if %command%==2 (set match=2)
-	if "%passed_command%"=="tiered_color_on" (set match=2)
-	if %command%==3 (set match=3)
-    if "%passed_command%"=="tiered_color_off" (set match=3)
-
-	if %command%==4 (set match=4)
-    if "%passed_command%"=="60_lines" (set match=4)
-    if %command%==5 (set match=5)
-    if "%passed_command%"=="66_lines" (set match=5)
-
-	if %command%==6 (set match=6)
-	if "%passed_command%"=="tray_switch_on" (set match=6)
-	if %command%==7 (set match=7)
-    if "%passed_command%"=="tray_switch_off" (set match=7)
-
-	if %command%==8 (set match=8)
-    if "%passed_command%"=="sleep_timer_on" (set match=8)
-    if %command%==9 (set match=9)
-    if "%passed_command%"=="sleep_timer_off" (set match=9)
-
-    if %command%==0 (set match=0)
-    if "%passed_command%"=="print_error_list" (set match=0)
-
-	if !match!==1 ( call :event_log "%passed_ip%" "%match%" )
-	if !match!==2 ( call :toggle_tiered_color "%passed_ip%" "%match%" )
-	if !match!==3 ( call :toggle_tiered_color "%passed_ip%" "%match%" )
-	if !match!==4 ( call :toggle_line_mode "%passed_ip%" "%match%" )
-	if !match!==5 ( call :toggle_line_mode "%passed_ip%" "%match%" )
-	if !match!==6 ( call :toggle_tray_switch "%passed_ip%" "%match%" )
-	if !match!==7 ( call :toggle_tray_switch "%passed_ip%" "%match%" )
-	if !match!==8 ( call :toggle_sleep_timer "%passed_ip%" "%match%" )
-	if !match!==9 ( call :toggle_sleep_timer "%passed_ip%" "%match%" )
-	if %command%==0 ( call :print_error_codes )
+	if %match%==1 ( call :event_log "%passed_ip%" "%match%" )
+	if %match%==2 ( call :toggle_tiered_color "%passed_ip%" "%match%" )
+	if %match%==3 ( call :toggle_tiered_color "%passed_ip%" "%match%" )
+	if %match%==4 ( call :toggle_line_mode "%passed_ip%" "%match%" )
+	if %match%==5 ( call :toggle_line_mode "%passed_ip%" "%match%" )
+	if %match%==6 ( call :toggle_tray_switch "%passed_ip%" "%match%" )
+	if %match%==7 ( call :toggle_tray_switch "%passed_ip%" "%match%" )
+	if %match%==8 ( call :toggle_sleep_timer "%passed_ip%" "%match%" )
+	if %match%==9 ( call :toggle_sleep_timer "%passed_ip%" "%match%" )
+	if %match%==0 ( call :print_error_codes )
 
 	call :error_exit "[INVALID_COMMAND_CHOICE_ERROR]"
+	color
 	exit
 
 :event_log
@@ -269,12 +280,12 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 		)
 	)
 	call :lpr_command "%passed_ip%" "!file_path!"
+	color
 	exit
 
 :toggle_tiered_color
-    set "file_path="
 
-    if "%2"==2 (
+    if "%~2"==2 (
         set "file_path=%USERPROFILE%\Kyocera_Commands\3_tier_color_on.txt"
         if not exist "!file_path!" (
             (
@@ -294,12 +305,12 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
         )
     )
     call :lpr_command "%passed_ip%" "!file_path!"
+    color
     exit
 
 :toggle_line_mode
-    set "file_path="
 
-    if "%2"==4 (
+    if "%~2"==4 (
         set "file_path=%USERPROFILE%\Kyocera_Commands\60_line_mode.txt"
         if not exist "!file_path!" (
             (
@@ -317,12 +328,12 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
         )
     )
     call :lpr_command "%passed_ip%" "!file_path!"
+    color
     exit
 
 :toggle_tray_switch
-    set "file_path="
 
-    if "%2"==6 (
+    if "%~2"=="6" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\tray_switch_on.txt"
         if not exist "!file_path!" (
             (
@@ -340,12 +351,12 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
         )
     )
     call :lpr_command "%passed_ip%" "!file_path!"
+    color
     exit
 
 :toggle_sleep_timer
-    set "file_path="
 
-    if "%2"==8 (
+    if "%~2"==8 (
         set "file_path=%USERPROFILE%\Kyocera_Commands\sleep_timer_on.txt"
         if not exist "!file_path!" (
             (
@@ -363,6 +374,7 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
         )
     )
     call :lpr_command "%passed_ip%" "!file_path!"
+    color
     exit
 
 :: Uses LPR to send the command to the Device
@@ -389,6 +401,7 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 
 	if %ERRORLEVEL%==0 (
 		call :error_exit "[NO_PING_NETWORK_ERROR]"
+		color
 		exit
 	)
 
@@ -404,6 +417,7 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 
 	echo Command sent. Press any key to exit...
 	pause>nul | echo.
+	color
 	exit
 
 :: Here is a list of all pre-programmed error codes that can be experienced
@@ -441,6 +455,7 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 	echo.
 	echo Press any key to exit...
 	pause>nul | echo.
+	color
 	exit
 
 :: Intentional exit of the program in case of a pre-programmed error
@@ -449,4 +464,7 @@ if "%arg_1%"=="" if "%arg_2%"=="" (
 	echo.
 	echo %~1 Press any key to exit...
 	pause>nul | echo.
+	color
 	exit
+
+:eof

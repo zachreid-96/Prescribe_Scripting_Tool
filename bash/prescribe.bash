@@ -343,7 +343,7 @@ toggle_tray_switch() {
   echo -ne "\033[1;36m"
   echo ""
   echo "Mode not currently enabled. Please contact code maintainer for help."
-  read -r -p "%F{cyan}Press any key to exit...%f" not_configured
+  read -r -p "Press any key to exit..." not_configured
   echo -e "\033[0m"
   exit 1
 
