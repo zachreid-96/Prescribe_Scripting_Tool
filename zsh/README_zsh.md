@@ -1,36 +1,36 @@
-# Prescribe Batch Script Tool
+# Prescribe ZSH Script Tool
 
-This script has been tested on Windows 11, and should work with Windows 10, testing will not be done with previous versions of Windows. This script is the original script and overhauled to match the unified user experience across all scripts in the repo.
+This script has been tested on macOS 10.14 running Bash v5.4, as well as on Kali Linux running Bash v5.9. This script was written with backwards compatibility in mind, and with a unified user experience across all scripts in the repo.
 
 ## Setup
 
 ### Make Executable (recommended)
-
-Move the .bat file to a permanent location, like 
-
-    C:\Scripts\Kyocera\Prescribe\prescribe.bat
-
-Press Win+R, type 'sysdm.cpl', then <Enter>
-
-Advanced > Environment Variables > System Variables > Path > Edit > New
-
-Add the permanent folder you just made > Ok
-
-Restart terminal (command prompt)
-
-Then running from CLI, with script in PATH, where {arg1} and {arg2} are optional arguments (see below)
+To make the script executable run the following after navigating to the correct directory in terminal
 
 ```shell
-prescribe.bat {arg1} {arg2}
+chmod +x prescribe.zsh
+```
+
+To add the script to PATH run the following, may need admin rights to move script
+
+```shell
+mv prescribe.zsh /usr/local/bin
+chmod +x /usr/local/bin/prescribe.zsh
+```
+
+Once the script has been moved and given executable rights, calling from CLI would look where {arg1} and {arg2} are optional arguments (see below)
+
+```shell
+prescribe.zsh {arg1} {arg2}
 ```
 
 ### Declare Static IP (optional)
 To declare a static IP the script will *always* use do the following per used script.
 
-`.bat` edit line 11
+`.zsh` edit line 495
 
-    line 11:  declared_ip=""
-    line 11:  declared_ip="172.10.0.5"
+    line 495:  declared_ip=""
+    line 495:  declared_ip="172.10.0.5"
 
 ## Using the Script
 There are two ways to run and use the script
@@ -43,11 +43,11 @@ This way of running the script will ask you for the IP (unless already declared)
 ### CLI calling (less prompts)
 There are multiple ways to run the script via CLI. The ones the script will handle are as follows:
 
-    prescribe.bat                        (no args)
-    prescribe.bat 172.10.0.5             (IP as arg)
-    prescribe.bat event_log              (command as arg)
-    prescribe.bat 172.10.0.5 event_log   (both args)
-    prescribe.bat event_log 172.10.0.5   (both args)
+    prescribe.zsh                        (no args)
+    prescribe.zsh 172.10.0.5             (IP as arg)
+    prescribe.zsh event_log              (command as arg)
+    prescribe.zsh 172.10.0.5 event_log   (both args)
+    prescribe.zsh event_log 172.10.0.5   (both args)
 
 Running with no passed args will net the same experience as double-clicking the script<br>
 Running with 1 passed arg will prompt for input on the missing arg<br>
@@ -56,7 +56,7 @@ Running with 2 passed args will not prompt for any input
 In order to run this script via CLI (see above for PATH), the command is as follows for NOT PATH where {arg1} and {arg2} are optional arguments
 
 ```shell
-bat /path/to/file/prescribe.bat {arg1} {arg2}
+zsh /path/to/file/prescribe.zsh {arg1} {arg2}
 ```
 
 All Scripts will work in the same fashion. Able to be interacted with in the same fashion. All Scripts will be able to take the following commands as arguments (args)

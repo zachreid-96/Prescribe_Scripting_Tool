@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from __future__ import print_function, absolute_import
 import sys
 import subprocess
@@ -135,7 +136,7 @@ def get_command(ip, command):
             user_choice = str(input("Enter Menu Choice: "))
         except NameError:
             user_choice = str(input("Enter Menu Choice: "))
-            
+
     if user_choice == -99:
         user_choice = str(command_dictionary.index(passed_command))
 

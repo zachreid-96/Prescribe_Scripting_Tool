@@ -1,38 +1,19 @@
 # A Multi-Language Kyocera Prescribe Tool
 
-The aim of the repository is to create a Kyocera Prescribe Tool pre-loaded with common prescribe commands that can be easily expanded to fit bigger needs.
+The aim of the repository is to create a Kyocera Prescribe Tool preloaded with common prescribe commands that can be easily expanded to fit bigger needs. This script was written with backwards compatibility in mind, and with a unified user experience across all scripts in the repo.
 
-This repository contains the script tool in mulitple languages:
+This repository contains the script tool in multiple languages:
 - **Batch** (`batch/`): Windows `.bat` scripts
 - **Bash** (`bash/`): Linux/macOS shell scripts (v3.2 and higher)
 - **Zsh** (`zsh/`): Advanced shell scripting (v5.x)
 - **Python** (`python/`): Python 2.7 and Python 3.12
-- **PowerShell** (`ps1/`): Windows `.ps1` scripts
+- **PowerShell** (`ps1/`): Windows `.ps1` scripts (NOT IMPLEMENTED)
 
 ## Getting Started
 Clone the repository:
 ```shell
 git clone https://github.com/zachreid-96/Prescribe_Scripting_Tool
 ```
-
-## Setup (Optional)
-To declare a static IP the script will *always* use do the following per used script.
-
-`.bat` edit line 11
-
-    line 11:  set "declared_ip="
-    line 11:  set "declared_ip=172.10.0.5"
-
-`.bash` edit line 345
-
-    line 345:  declared_ip=""
-    line 345:  declared_ip="172.10.0.5"
-
-`.zsh` edit line 3
-
-    line 3:  declared_ip=""
-    line 3:  declared_ip="172.10.0.5"
-
 
 ## Using the Script
 There are two ways to run and use the script
@@ -67,3 +48,5 @@ All Scripts will work in the same fashion. Able to be interacted with in the sam
     sleep_timer_on
     sleep_timer_off
     print_error_list
+
+If any bugs occur, or new prescribe commands need added, let me know or submit a request in <Issues>
