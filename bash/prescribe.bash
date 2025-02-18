@@ -146,6 +146,7 @@ get_command() {
 	user_choice=-999
 
   command_dictionary=()
+  command_dictionary[0]="print_error_list"
   command_dictionary[1]="event_log"
   command_dictionary[2]="tiered_color_on"
   command_dictionary[3]="tiered_color_off"
@@ -155,7 +156,8 @@ get_command() {
   command_dictionary[7]="tray_switch_off"
   command_dictionary[8]="sleep_timer_on"
   command_dictionary[9]="sleep_timer_off"
-  command_dictionary[0]="print_error_list"
+  command_dictionary[10]="backup"
+  command_dictionary[11]="initialize"
 
   if [[ -z "$passed_command" ]]; then
 
@@ -169,6 +171,8 @@ get_command() {
     echo "[ 7 ] - Turn off Tray Switch"
     echo "[ 8 ] - Turn on Sleep Timer"
     echo "[ 9 ] - Turn off Sleep Timer"
+    echo "[ 10 ] - Backup FRPO Settings"
+    echo "[ 11 ] - Initialize FRPO Settings"
     echo "[ 0 ] - Display Error Menu List"
 
     echo ""
@@ -194,6 +198,8 @@ get_command() {
     toggle_tray_switch "$passed_ip" "$user_choice"
   elif [[ "$user_choice" == 8 || "$user_choice" == 9 ]]; then
     toggle_sleep_timer "$passed_ip" "$user_choice"
+  elif [[ "$user_choice" == 10 || "$user_choice" == 11 ]]; then
+    backup_initialize "$passed_ip" "$user_choice"
   elif [[ "$user_choice" == 0 ]]; then
     error_list
   else
@@ -248,7 +254,7 @@ toggle_tiered_color() {
   file_path_off="$HOME/Kyocera_commands/3_tier_off.txt"
 
   if [[ "$2" == 2 ]]; then
-    if [[ ! -f "$file_path" ]]; then
+    if [[ ! -f "$file_path_on" ]]; then
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
       fi
@@ -262,7 +268,7 @@ toggle_tiered_color() {
       error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   elif [[ "$2" == 3 ]]; then
-    if [[ ! -f "$file_path" ]]; then
+    if [[ ! -f "$file_path_off" ]]; then
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
       fi
@@ -295,7 +301,7 @@ toggle_line_mode() {
   file_path_66="$HOME/Kyocera_commands/66_line_mode.txt"
 
   if [[ "$2" == 4 ]]; then
-    if [[ ! -f "$file_path" ]]; then
+    if [[ ! -f "$file_path_60" ]]; then
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
       fi
@@ -307,7 +313,7 @@ toggle_line_mode() {
       error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   elif [[ "$2" == 5 ]]; then
-    if [[ ! -f "$file_path" ]]; then
+    if [[ ! -f "$file_path_66" ]]; then
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
       fi
@@ -331,6 +337,8 @@ toggle_line_mode() {
 # 	$2 = arg_2 and should be the desired prescribe command
 # Will create command file if needed
 # Toggles tray switch ON/OFF
+# FRPO X9,9 -> Performs paper selection on paper sources and driver priority mode
+# FRPO R2,0 -> Sets size of default paper cassette
 # Uses netcat to send the command via IP address
 # NO RETURNS
 toggle_tray_switch() {
@@ -339,20 +347,12 @@ toggle_tray_switch() {
   file_path_on="$HOME/Kyocera_commands/tray_switch_on.txt"
   file_path_off="$HOME/Kyocera_commands/tray_switch_off.txt"
 
-  not_configured=""
-  echo -ne "\033[1;36m"
-  echo ""
-  echo "Mode not currently enabled. Please contact code maintainer for help."
-  read -r -p "Press any key to exit..." not_configured
-  echo -e "\033[0m"
-  exit 1
-
   if [[ "$2" == 6 ]]; then
-    if [[ ! -f "$file_path" ]]; then
+    if [[ ! -f "$file_path_on" ]]; then
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
       fi
-      printf "!R! FRPO A2,10; EXIT;" > "$file_path_on" # NEEDS edit
+      printf "!R! FRPO X9,9; FRPO R2,0; EXIT;" > "$file_path_on"
     fi
     if which lpr &>/dev/null; then
       lpr -H "${passed_ip}:9100" -o raw "$file_path_on" &> /dev/null &
@@ -360,11 +360,11 @@ toggle_tray_switch() {
       error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   elif [[ "$2" == 7 ]]; then
-    if [[ ! -f "$file_path" ]]; then
+    if [[ ! -f "$file_path_off" ]]; then
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
       fi
-      printf "!R! FRPO A2,10; EXIT;" > "$file_path_off"
+      printf "!R! FRPO X9,0; FRPO R2,0; EXIT;" > "$file_path_off"
     fi
     if which lpr &>/dev/null; then
       lpr -H "${passed_ip}:9100" -o raw "$file_path_off" &> /dev/null &
@@ -394,7 +394,7 @@ toggle_sleep_timer() {
   file_path_off="$HOME/Kyocera_commands/sleep_timer_off.txt"
 
   if [[ "$2" == 8 ]]; then
-    if [[ ! -f "$file_path" ]]; then
+    if [[ ! -f "$file_path_on" ]]; then
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
       fi
@@ -406,7 +406,7 @@ toggle_sleep_timer() {
       error_exit "[LPR_NOT_INSTALLED_ERROR]"
     fi
   elif [[ "$2" == 9 ]]; then
-    if [[ ! -f "$file_path" ]]; then
+    if [[ ! -f "$file_path_off" ]]; then
       if [[ ! -f "$dir_path" ]]; then
         mkdir -p "$dir_path"
       fi
@@ -425,6 +425,54 @@ toggle_sleep_timer() {
   echo -e "\033[0m"
   exit 1
 }
+
+
+# Passed args
+# 	$1 = arg_1 and should be the IP address
+# 	$2 = arg_2 and should be the desired prescribe command
+# Will create command file if needed
+# Initializes FRPO settings or backups them up by printing Service Status Page
+# Uses netcat to send the command via IP address
+# NO RETURNS
+backup_initialize() {
+  passed_ip="$1"
+  dir_path="$HOME/Kyocera_commands"
+  file_path_init="$HOME/Kyocera_commands/initialize.txt"
+  file_path_backup="$HOME/Kyocera_commands/backup.txt"
+
+  if [[ "$2" == 10 ]]; then
+    if [[ ! -f "$file_path_backup" ]]; then
+      if [[ ! -f "$dir_path" ]]; then
+        mkdir -p "$dir_path"
+      fi
+      printf "!R! STAT 1; EXIT;" > "$file_path_backup"
+    fi
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_backup" &> /dev/null &
+    else
+      error_exit "[LPR_NOT_INSTALLED_ERROR]"
+    fi
+  elif [[ "$2" == 11 ]]; then
+    if [[ ! -f "$file_path_init" ]]; then
+      if [[ ! -f "$dir_path" ]]; then
+        mkdir -p "$dir_path"
+      fi
+      printf "!R! FRPO INIT; EXIT;" > "$file_path_init"
+    fi
+    if which lpr &>/dev/null; then
+      lpr -H "${passed_ip}:9100" -o raw "$file_path_init" &> /dev/null &
+    else
+      error_exit "[LPR_NOT_INSTALLED_ERROR]"
+    fi
+  fi
+
+  exit_condition=""
+  echo ""
+  read -r -p "Sent command to copier/printer. Press any key to exit..." exit_condition
+  echo -e "\033[0m"
+  exit 1
+}
+
 
 # Passed args
 #   $1 = whatever pre-programmed error code happened

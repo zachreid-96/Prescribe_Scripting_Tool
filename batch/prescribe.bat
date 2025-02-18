@@ -220,6 +220,8 @@ if "%arg_1%"=="" (
         echo [ 7 ] - Turn off Tray Switch
         echo [ 8 ] - Turn on Sleep Timer
         echo [ 9 ] - Turn off Sleep Timer
+        echo [ 10 ] - Backup FRPO Settings
+        echo [ 11 ] - Initialize FRPO Settings
         echo [ 0 ] - Display Error Menu List
 
 		set /p "command=Enter Menu Choice: " || set command=0
@@ -234,6 +236,8 @@ if "%arg_1%"=="" (
         if "%passed_command%"=="tray_switch_off" ( set command=7 )
         if "%passed_command%"=="sleep_timer_on" ( set command=8 )
         if "%passed_command%"=="sleep_timer_off" ( set command=9 )
+        if "%passed_command%"=="backup" ( set command=10 )
+        if "%passed_command%"=="initialize" ( set command=11 )
 	)
 
 	set "dir_path=%USERPROFILE%\Kyocera_Commands"
@@ -253,6 +257,8 @@ if "%arg_1%"=="" (
 	if %command%==7 ( set match=7 )
 	if %command%==8 ( set match=8 )
     if %command%==9 ( set match=9 )
+    if %command%==10 ( set match=10 )
+    if %command%==11 ( set match=11 )
     if %command%==0 ( set match=0 )
 
 	if %match%==1 ( call :event_log "%passed_ip%" "%match%" )
@@ -264,6 +270,8 @@ if "%arg_1%"=="" (
 	if %match%==7 ( call :toggle_tray_switch "%passed_ip%" "%match%" )
 	if %match%==8 ( call :toggle_sleep_timer "%passed_ip%" "%match%" )
 	if %match%==9 ( call :toggle_sleep_timer "%passed_ip%" "%match%" )
+	if %match%==10 ( call :backup_initialize "%passed_ip%" "%match%" )
+	if %match%==11 ( call :backup_initialize "%passed_ip%" "%match%" )
 	if %match%==0 ( call :print_error_codes )
 
 	call :error_exit "[INVALID_COMMAND_CHOICE_ERROR]"
@@ -289,7 +297,6 @@ if "%arg_1%"=="" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\3_tier_color_on.txt"
         if not exist "!file_path!" (
             (
-                :: echo | set /p="^!R^!KCFG"TCCM",1;EXIT;">"!file_path!"
                 echo | set /p="!R!KCFG"TCCM",1;">"!file_path!"
                 echo | set /p="!R!KCFG"STCT",1,20;">>"!file_path!"
                 echo | set /p="!R!KCFG"STCT",2,50;EXIT;">>"!file_path!"
@@ -299,7 +306,6 @@ if "%arg_1%"=="" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\3_tier_color_off.txt"
         if not exist "!file_path!" (
             (
-                :: echo | set /p="^!R^!KCFG"TCCM",0;EXIT;">"!file_path!"
                 echo | set /p="!R!KCFG"TCCM",0;">"!file_path!"
             )
         )
@@ -314,7 +320,6 @@ if "%arg_1%"=="" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\60_line_mode.txt"
         if not exist "!file_path!" (
             (
-                :: echo | set /p="!R! FRPO U0,6; FRPO U1,60; EXIT;">"!file_path!"
                 echo | set /p="!R! FRPO U0,6; FRPO U1,60; EXIT;">"!file_path!"
             )
         )
@@ -322,7 +327,6 @@ if "%arg_1%"=="" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\66_line_mode.txt"
         if not exist "!file_path!" (
             (
-                :: echo | set /p="!R! FRPO U0,6; FRPO U1,66; EXIT;">"!file_path!"
                 echo | set /p="!R! FRPO U0,6; FRPO U1,66; EXIT;">"!file_path!"
             )
         )
@@ -337,16 +341,14 @@ if "%arg_1%"=="" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\tray_switch_on.txt"
         if not exist "!file_path!" (
             (
-                :: echo | set /p="!R! FRPO A2,10; EXIT;">"!file_path!" Needs Editing
-                echo | set /p="!R! FRPO A2,10; EXIT;">"!file_path!"
+                echo | set /p="!R! FRPO X9,9; FRPO R2,0; EXIT;">"!file_path!"
             )
         )
     ) else (
         set "file_path=%USERPROFILE%\Kyocera_Commands\tray_switch_off.txt"
         if not exist "!file_path!" (
             (
-                :: echo | set /p="!R! FRPO A2,10; EXIT;">"!file_path!"
-                echo | set /p="!R! FRPO A2,10; EXIT;">"!file_path!"
+                echo | set /p="!R! FRPO X9,0; FRPO R2,0; EXIT;">"!file_path!"
             )
         )
     )
@@ -360,7 +362,6 @@ if "%arg_1%"=="" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\sleep_timer_on.txt"
         if not exist "!file_path!" (
             (
-                :: echo | set /p="!R! FRPO N5,0; EXIT;">"!file_path!" Needs Editing
                 echo | set /p="!R! FRPO N5,1; EXIT;">"!file_path!"
             )
         )
@@ -368,8 +369,28 @@ if "%arg_1%"=="" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\sleep_timer_off.txt"
         if not exist "!file_path!" (
             (
-                :: echo | set /p="!R! FRPO N5,0; EXIT;">"!file_path!"
                 echo | set /p="!R! FRPO N5,0; EXIT;">"!file_path!"
+            )
+        )
+    )
+    call :lpr_command "%passed_ip%" "!file_path!"
+    color
+    exit
+
+:backup_initialize
+
+    if "%~2"==10 (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\initialize.txt"
+        if not exist "!file_path!" (
+            (
+                echo | set /p="!R! STAT 1; EXIT;">"!file_path!"
+            )
+        )
+    ) else (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\backup.txt"
+        if not exist "!file_path!" (
+            (
+                echo | set /p="!R! FRPO INIT; EXIT;">"!file_path!"
             )
         )
     )

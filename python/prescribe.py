@@ -116,6 +116,8 @@ def get_command(ip, command):
     command_dictionary.append("tray_switch_off")
     command_dictionary.append("sleep_timer_on")
     command_dictionary.append("sleep_timer_off")
+    command_dictionary.append("backup")
+    command_dictionary.append("initialize")
 
     if passed_command == "":
         print("Command Options:")
@@ -128,6 +130,8 @@ def get_command(ip, command):
         print("[ 7 ] - Turn off Tray Switch")
         print("[ 8 ] - Turn on Sleep Timer")
         print("[ 9 ] - Turn off Sleep Timer")
+        print("[ 10 ] - Backup FRPO Settings")
+        print("[ 11 ] - Initialize FRPO Settings")
         print("[ 0 ] - Display Error Menu List")
 
         print("")
@@ -150,6 +154,8 @@ def get_command(ip, command):
         toggle_tray_switch(passed_ip, user_choice)
     elif user_choice == "8" or user_choice == "9":
         toggle_sleep_timer(passed_ip, user_choice)
+    elif user_choice == "8" or user_choice == "9":
+        backup_initialize(passed_ip, user_choice)
     elif user_choice == "0":
         error_list()
 
@@ -220,13 +226,13 @@ def toggle_line_mode(ip, command):
         file_path_60 = os.path.join(os.environ['HOME'], 'Kyocera_commands', 'file_path_60.txt')
         file_path_66 = os.path.join(os.environ['HOME'], 'Kyocera_commands', 'file_path_66.txt')
 
-    if command == "2":
+    if command == "4":
         if not os.path.exists(file_path_60):
             with open(file_path_60, 'w') as f:
                 f.write('!R! FRPO U0,6; FRPO U1,60; EXIT;')
         send_lpr_command(ip, file_path_60)
 
-    elif command == "3":
+    elif command == "5":
         if not os.path.exists(file_path_66):
             with open(file_path_66, 'w') as f:
                 f.write('!R! FRPO U0,6; FRPO U1,66; EXIT;')
@@ -247,25 +253,16 @@ def toggle_tray_switch(ip, command):
         tray_switch_on = os.path.join(os.environ['HOME'], 'Kyocera_commands', 'tray_switch_on.txt')
         tray_switch_off = os.path.join(os.environ['HOME'], 'Kyocera_commands', 'tray_switch_off.txt')
 
-    print("")
-    print("Mode not currently enabled. Please contact code maintainer for help.")
-    try:
-        raw_input("Press any key to exit...")
-        exit()
-    except NameError:
-        input("Press any key to exit...")
-        exit()
-
-    if command == "2":
+    if command == "6":
         if not os.path.exists(tray_switch_on):
             with open(tray_switch_on, 'w') as f:
-                f.write('!R! FRPO A2,10; EXIT;')  # NEED edit
+                f.write('!R! FRPO X9,9; FRPO R2,0; EXIT;')
         send_lpr_command(ip, tray_switch_on)
 
-    elif command == "3":
+    elif command == "7":
         if not os.path.exists(tray_switch_off):
             with open(tray_switch_off, 'w') as f:
-                f.write('!R! FRPO A2,10; EXIT;')
+                f.write('!R! FRPO X9,0; FRPO R2,0; EXIT;')
         send_lpr_command(ip, tray_switch_off)
 
 
@@ -284,17 +281,44 @@ def toggle_sleep_timer(ip, command):
         sleep_timer_on = os.path.join(os.environ['HOME'], 'Kyocera_commands', 'sleep_timer_on.txt')
         sleep_timer_off = os.path.join(os.environ['HOME'], 'Kyocera_commands', 'sleep_timer_off.txt')
 
-    if command == "2":
+    if command == "8":
         if not os.path.exists(sleep_timer_on):
             with open(sleep_timer_on, 'w') as f:
                 f.write('!R! FRPO N5,1; EXIT;')
         send_lpr_command(ip, sleep_timer_on)
 
-    elif command == "3":
+    elif command == "9":
         if not os.path.exists(sleep_timer_off):
             with open(sleep_timer_off, 'w') as f:
                 f.write('!R! FRPO N5,0; EXIT;')
         send_lpr_command(ip, sleep_timer_off)
+
+
+# Passed args
+# 	passed_ip = ip and should be the IP address
+# 	passed_command = command and should be the desired prescribe command
+# Will create command file if needed
+# Initializes FRPO settings or backups them up by printing Service Status Page
+# NO RETURNS
+def backup_initialize(ip, command):
+    try:
+        init_FRPO = os.path.join(os.environ['USERPROFILE'], 'Kyocera_commands', 'initialize.txt')
+        backup_FRPO = os.path.join(os.environ['USERPROFILE'], 'Kyocera_commands', 'backup.txt')
+    except KeyError:
+        init_FRPO = os.path.join(os.environ['HOME'], 'Kyocera_commands', 'initialize.txt')
+        backup_FRPO = os.path.join(os.environ['HOME'], 'Kyocera_commands', 'backup.txt')
+
+    if command == "10":
+        if not os.path.exists(backup_FRPO):
+            with open(backup_FRPO, 'w') as f:
+                f.write('!R! STAT,1; EXIT;')
+        send_lpr_command(ip, backup_FRPO)
+
+    elif command == "11":
+        if not os.path.exists(init_FRPO):
+            with open(init_FRPO, 'w') as f:
+                f.write('!R! FRPO INIT; EXIT;')
+        send_lpr_command(ip, init_FRPO)
 
 
 # Passed args

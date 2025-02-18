@@ -48,5 +48,7 @@ All Scripts will work in the same fashion. Able to be interacted with in the sam
     sleep_timer_on
     sleep_timer_off
     print_error_list
+    backup
+    initialize
 
 If any bugs occur, or new prescribe commands need added, let me know or submit a request in <Issues>
