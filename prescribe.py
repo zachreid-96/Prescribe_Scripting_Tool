@@ -169,7 +169,7 @@ def help_options():
     print("python prescribe.py --help")
     print("python prescribe.py --update")
     print("")
-    safe_exit("SAFE EXIT - Output Help/Update Options")
+    safe_exit("SAFE EXIT - Displayed Help Options")
 
 
 # Passed args
@@ -671,7 +671,7 @@ if __name__ == "__main__":
             print("")
             print("To See the Error List Enter '0' or run again with arg '--commands print_error_list")
             print("")
-            safe_exit("SAFE EXIT - Output Current Command Options")
+            safe_exit("SAFE EXIT - Displayed Current Command Options")
 
         elif sys.argv[0] == "--help":
             help_options()
