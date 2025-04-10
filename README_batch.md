@@ -73,3 +73,5 @@ All Scripts will work in the same fashion. Able to be interacted with in the sam
     print_error_list
     backup
     initialize
+    delete_commands
+    create_commands

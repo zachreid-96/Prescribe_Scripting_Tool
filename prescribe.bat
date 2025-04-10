@@ -222,6 +222,8 @@ if "%arg_1%"=="" (
         echo [ 9 ] - Turn off Sleep Timer
         echo [ 10 ] - Backup FRPO Settings
         echo [ 11 ] - Initialize FRPO Settings
+        echo [ 98 ] - Delete all Prescribe Command files
+        echo [ 99 ] - Create all Prescribe Command files
         echo [ 0 ] - Display Error Menu List
 
 		set /p "command=Enter Menu Choice: " || set command=0
@@ -238,6 +240,8 @@ if "%arg_1%"=="" (
         if "%passed_command%"=="sleep_timer_off" ( set command=9 )
         if "%passed_command%"=="backup" ( set command=10 )
         if "%passed_command%"=="initialize" ( set command=11 )
+        if "%passed_command%"=="delete_commands" ( set command=98 )
+        if "%passed_command%"=="create_commands" ( set command=99 )
 	)
 
 	set "dir_path=%USERPROFILE%\Kyocera_Commands"
@@ -259,6 +263,8 @@ if "%arg_1%"=="" (
     if %command%==9 ( set match=9 )
     if %command%==10 ( set match=10 )
     if %command%==11 ( set match=11 )
+    if %command%==98 ( set match=98 )
+    if %command%==99 ( set match=99 )
     if %command%==0 ( set match=0 )
 
 	if %match%==1 ( call :event_log "%passed_ip%" "%match%" )
@@ -272,6 +278,8 @@ if "%arg_1%"=="" (
 	if %match%==9 ( call :toggle_sleep_timer "%passed_ip%" "%match%" )
 	if %match%==10 ( call :backup_initialize "%passed_ip%" "%match%" )
 	if %match%==11 ( call :backup_initialize "%passed_ip%" "%match%" )
+	if %match%==98 ( call :backup_initialize "%match%" )
+	if %match%==99 ( call :backup_initialize "%match%" )
 	if %match%==0 ( call :print_error_codes )
 
 	call :error_exit "[INVALID_COMMAND_CHOICE_ERROR]"
@@ -293,20 +301,20 @@ if "%arg_1%"=="" (
 
 :toggle_tiered_color
 
-    if "%~2"==2 (
+    if "%~2"=="2" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\3_tier_color_on.txt"
         if not exist "!file_path!" (
             (
-                echo | set /p="!R!KCFG"TCCM",1;">"!file_path!"
-                echo | set /p="!R!KCFG"STCT",1,20;">>"!file_path!"
-                echo | set /p="!R!KCFG"STCT",2,50;EXIT;">>"!file_path!"
+                echo | set /p="^!R^!KCFG"TCCM",1;">"!file_path!"
+                echo | set /p="^!R^!KCFG"STCT",1,20;">>"!file_path!"
+                echo | set /p="^!R^!KCFG"STCT",2,50;EXIT;">>"!file_path!"
             )
         )
     ) else (
         set "file_path=%USERPROFILE%\Kyocera_Commands\3_tier_color_off.txt"
         if not exist "!file_path!" (
             (
-                echo | set /p="!R!KCFG"TCCM",0;">"!file_path!"
+                echo | set /p="^!R^!KCFG"TCCM",0;">"!file_path!"
             )
         )
     )
@@ -316,18 +324,18 @@ if "%arg_1%"=="" (
 
 :toggle_line_mode
 
-    if "%~2"==4 (
+    if "%~2"=="4" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\60_line_mode.txt"
         if not exist "!file_path!" (
             (
-                echo | set /p="!R! FRPO U0,6; FRPO U1,60; EXIT;">"!file_path!"
+                echo | set /p="^!R^! FRPO U0,6; FRPO U1,60; EXIT;">"!file_path!"
             )
         )
     ) else (
         set "file_path=%USERPROFILE%\Kyocera_Commands\66_line_mode.txt"
         if not exist "!file_path!" (
             (
-                echo | set /p="!R! FRPO U0,6; FRPO U1,66; EXIT;">"!file_path!"
+                echo | set /p="^!R^! FRPO U0,6; FRPO U1,66; EXIT;">"!file_path!"
             )
         )
     )
@@ -341,14 +349,14 @@ if "%arg_1%"=="" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\tray_switch_on.txt"
         if not exist "!file_path!" (
             (
-                echo | set /p="!R! FRPO X9,9; FRPO R2,0; EXIT;">"!file_path!"
+                echo | set /p="^!R^! FRPO X9,9; FRPO R2,0; EXIT;">"!file_path!"
             )
         )
     ) else (
         set "file_path=%USERPROFILE%\Kyocera_Commands\tray_switch_off.txt"
         if not exist "!file_path!" (
             (
-                echo | set /p="!R! FRPO X9,0; FRPO R2,0; EXIT;">"!file_path!"
+                echo | set /p="^!R^! FRPO X9,0; FRPO R2,0; EXIT;">"!file_path!"
             )
         )
     )
@@ -358,18 +366,18 @@ if "%arg_1%"=="" (
 
 :toggle_sleep_timer
 
-    if "%~2"==8 (
+    if "%~2"=="8" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\sleep_timer_on.txt"
         if not exist "!file_path!" (
             (
-                echo | set /p="!R! FRPO N5,1; EXIT;">"!file_path!"
+                echo | set /p="^!R^! FRPO N5,1; EXIT;">"!file_path!"
             )
         )
     ) else (
         set "file_path=%USERPROFILE%\Kyocera_Commands\sleep_timer_off.txt"
         if not exist "!file_path!" (
             (
-                echo | set /p="!R! FRPO N5,0; EXIT;">"!file_path!"
+                echo | set /p="^!R^! FRPO N5,0; EXIT;">"!file_path!"
             )
         )
     )
@@ -379,24 +387,86 @@ if "%arg_1%"=="" (
 
 :backup_initialize
 
-    if "%~2"==10 (
+    if "%~2"=="10" (
         set "file_path=%USERPROFILE%\Kyocera_Commands\initialize.txt"
         if not exist "!file_path!" (
             (
-                echo | set /p="!R! STAT 1; EXIT;">"!file_path!"
+                echo | set /p="^!R^! STAT 1; EXIT;">"!file_path!"
             )
         )
     ) else (
         set "file_path=%USERPROFILE%\Kyocera_Commands\backup.txt"
         if not exist "!file_path!" (
             (
-                echo | set /p="!R! FRPO INIT; EXIT;">"!file_path!"
+                echo | set /p="^!R^! FRPO INIT; EXIT;">"!file_path!"
             )
         )
     )
     call :lpr_command "%passed_ip%" "!file_path!"
     color
     exit
+
+::Will either create or delete all programmed prescribe command .txt files
+:prescribe_file_handler
+
+    if "%~1"=="98" (
+        del "%USERPROFILE%\Kyocera_Commands\event_log.txt" >nul 2>&1
+        del "%USERPROFILE%\Kyocera_Commands\3_tier_color_on.txt" >nul 2>&1
+        del "%USERPROFILE%\Kyocera_Commands\3_tier_color_off.txt" >nul 2>&1
+        del "%USERPROFILE%\Kyocera_Commands\60_line_mode.txt" >nul 2>&1
+        del "%USERPROFILE%\Kyocera_Commands\66_line_mode.txt" >nul 2>&1
+        del "%USERPROFILE%\Kyocera_Commands\tray_switch_on.txt" >nul 2>&1
+        del "%USERPROFILE%\Kyocera_Commands\tray_switch_off.txt" >nul 2>&1
+        del "%USERPROFILE%\Kyocera_Commands\sleep_timer_on.txt" >nul 2>&1
+        del "%USERPROFILE%\Kyocera_Commands\sleep_timer_off.txt" >nul 2>&1
+        del "%USERPROFILE%\Kyocera_Commands\initialize.txt" >nul 2>&1
+        del "%USERPROFILE%\Kyocera_Commands\backup.txt" >nul 2>&1
+
+        call :safe_exit "Safe Exit - Deleted all Prescribe Command .txt files"
+        color
+        exit
+
+    ) else (
+        set "file_path=%USERPROFILE%\Kyocera_Commands\event_log.txt" >nul 2>&1
+        echo | set /p="^!R^!KCFG"ELOG";EXIT;">"!file_path!"
+
+        set "file_path=%USERPROFILE%\Kyocera_Commands\3_tier_color_on.txt" >nul 2>&1
+        echo | set /p="^!R^!KCFG"TCCM",1;">"!file_path!"
+        echo | set /p="^!R^!KCFG"STCT",1,20;">>"!file_path!"
+        echo | set /p="^!R^!KCFG"STCT",2,50;EXIT;">>"!file_path!"
+
+        set "file_path=%USERPROFILE%\Kyocera_Commands\3_tier_color_off.txt" >nul 2>&1
+        echo | set /p="^!R^!KCFG"TCCM",0;">"!file_path!"
+
+        set "file_path=%USERPROFILE%\Kyocera_Commands\60_line_mode.txt" >nul 2>&1
+        echo | set /p="^!R^! FRPO U0,6; FRPO U1,60; EXIT;">"!file_path!"
+
+        set "file_path=%USERPROFILE%\Kyocera_Commands\66_line_mode.txt" >nul 2>&1
+        echo | set /p="^!R^! FRPO U0,6; FRPO U1,66; EXIT;">"!file_path!"
+
+        set "file_path=%USERPROFILE%\Kyocera_Commands\tray_switch_on.txt" >nul 2>&1
+        echo | set /p="^!R^! FRPO X9,9; FRPO R2,0; EXIT;">"!file_path!"
+
+        set "file_path=%USERPROFILE%\Kyocera_Commands\tray_switch_off.txt" >nul 2>&1
+        echo | set /p="^!R^! FRPO X9,0; FRPO R2,0; EXIT;">"!file_path!"
+
+        set "file_path=%USERPROFILE%\Kyocera_Commands\sleep_timer_on.txt" >nul 2>&1
+        echo | set /p="^!R^! FRPO N5,1; EXIT;">"!file_path!"
+
+        set "file_path=%USERPROFILE%\Kyocera_Commands\sleep_timer_off.txt" >nul 2>&1
+        echo | set /p="^!R^! FRPO N5,0; EXIT;">"!file_path!"
+
+        set "file_path=%USERPROFILE%\Kyocera_Commands\initialize.txt" >nul 2>&1
+        echo | set /p="^!R^! STAT 1; EXIT;">"!file_path!"
+
+        set "file_path=%USERPROFILE%\Kyocera_Commands\backup.txt" >nul 2>&1
+        echo | set /p="^!R^! FRPO INIT; EXIT;">"!file_path!"
+
+        call :safe_exit "Safe Exit - Created all Prescribe Command .txt files"
+        color
+        exit
+    )
+
 
 :: Uses LPR to send the command to the Device
 :: Does ping the device first to see if it is reachable
@@ -442,6 +512,7 @@ if "%arg_1%"=="" (
 	exit
 
 :: Here is a list of all pre-programmed error codes that can be experienced
+:: List is as exhaustive as testing would allow, I'm sure I may have missed a few cases
 
 :print_error_codes
 	echo.
@@ -479,8 +550,14 @@ if "%arg_1%"=="" (
 	color
 	exit
 
-:: Intentional exit of the program in case of a pre-programmed error
-
+:: Intentional exit of the program for any safe exit
+:safe_exit
+    echo.
+    echo %~1 Press any key to exit...
+    pause>nul | echo.
+    color
+    exit
+ :: Intentional exit of the program in case of a pre-programmed error
 :error_exit
 	echo.
 	echo %~1 Press any key to exit...
