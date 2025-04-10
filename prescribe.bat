@@ -33,6 +33,16 @@ if "%arg_1%"=="" (
 	)
 
 ) else (
+    if "%arg_1%"=="--commands" (
+        call :command_options "%arg_1%" "%arg_2%"
+    )
+    if "%arg_1%"=="--help" (
+        call :help_options
+    )
+    if "%arg_1%"=="--update" (
+        call :update_options
+    )
+
     :: Handles CLI activation when args are passed
 	echo %arg_1% | findstr /c:"." > nul
 
@@ -67,8 +77,75 @@ if "%arg_1%"=="" (
 	)
 )
 
-:: Prompts user to enter an IP if not defined or passed as an arg
+:help_options
+    echo.
+    echo Please see the README.md for help with this script
+    echo Or visit the following link to see the README, script notes, or submit a bug report
+    echo https://github.com/zachreid-96/Prescribe_Scripting_Tool/tree/python
+    echo.
+    echo The following are all commands passable via CLI (let ip_addr stand for any given IP address)
+    echo.
+    echo prescribe.bat ip_addr event_log
+    echo prescribe.bat ip_addr tiered_color_on
+    echo prescribe.bat ip_addr tiered_color_off
+    echo prescribe.bat ip_addr 60_lines
+    echo prescribe.bat ip_addr 66_lines
+    echo prescribe.bat ip_addr tray_switch_on
+    echo prescribe.bat ip_addr tray_switch_off
+    echo prescribe.bat ip_addr sleep_timer_on
+    echo prescribe.bat ip_addr sleep_timer_off
+    echo prescribe.bat ip_addr print_error_list
+    echo prescribe.bat ip_addr backup
+    echo prescribe.bat ip_addr initialize
+    echo prescribe.bat --commands
+    echo prescribe.bat --commands print_error_list
+    echo prescribe.bat --commands delete_commands
+    echo prescribe.bat --commands create_commands
+    echo prescribe.bat --help
+    echo prescribe.bat --update
+    echo.
+    call :safe_exit "SAFE EXIT - Output Help/Update Options"
+    color
+    exit
 
+:update_options
+    echo.
+    echo Or visit the following link to check for an updated version, find the newest 'Python-v' tag
+    echo https://github.com/zachreid-96/Prescribe_Scripting_Tool/releases
+    echo.
+    call :safe_exit "SAFE EXIT - Displayed Update Link"
+    color
+    exit
+
+:command_options
+    set command=0
+    if "%~2"=="" (
+        echo.
+        echo [ 0 ] - Display Error Menu List
+        echo [ 98 ] - Delete all Prescribe Command files
+        echo [ 99 ] - Create all Prescribe Command files
+        echo.
+        set /p "command=Enter Menu Choice: " || set command=0
+    ) else (
+        if "%passed_command%"=="print_error_list" ( set command=0 )
+        if "%passed_command%"=="delete_commands" ( set command=98 )
+        if "%passed_command%"=="create_commands" ( set command=99 )
+    )
+
+    set match=0
+    if %command%==98 ( set match=98 )
+    if %command%==99 ( set match=99 )
+    if %command%==0 ( set match=0 )
+
+    if %match%==98 ( call :prescribe_file_handler "%match%" )
+    if %match%==99 ( call :prescribe_file_handler "%match%" )
+    if %match%==0 ( call :print_error_codes )
+
+    call :error_exit "[INVALID_COMMAND_CHOICE_ERROR]"
+    color
+    exit
+
+:: Prompts user to enter an IP if not defined or passed as an arg
 :get_ip
 
 	set "passed_ip=%~1"
@@ -79,7 +156,9 @@ if "%arg_1%"=="" (
 		color
 		exit
 	)
-
+	echo.
+    echo For help using this script or to see all available commands enter '--help'
+    echo Or run the script again from CLI with arg '--help'
 	echo.
 	echo Please enter Copier IP in following format 10.120.1.68
 	echo Or enter no IP to output the error list
@@ -93,6 +172,11 @@ if "%arg_1%"=="" (
 		call :print_error_codes
 		color
 		exit
+	)
+	if "%ip%"=="--help" (
+	    call :help_options
+	    color
+    	exit
 	)
 	if not "%ip%"=="0.0.0.0" (
 		call :verify_ip "%ip%" "%passed_command%"
@@ -222,13 +306,9 @@ if "%arg_1%"=="" (
         echo [ 9 ] - Turn off Sleep Timer
         echo [ 10 ] - Backup FRPO Settings
         echo [ 11 ] - Initialize FRPO Settings
-        echo [ 98 ] - Delete all Prescribe Command files
-        echo [ 99 ] - Create all Prescribe Command files
-        echo [ 0 ] - Display Error Menu List
 
 		set /p "command=Enter Menu Choice: " || set command=0
 	) else (
-	    if "%passed_command%"=="print_error_list" ( set command=0 )
         if "%passed_command%"=="event_log" ( set command=1 )
         if "%passed_command%"=="tiered_color_on" ( set command=2 )
         if "%passed_command%"=="tiered_color_off" ( set command=3 )
@@ -240,8 +320,6 @@ if "%arg_1%"=="" (
         if "%passed_command%"=="sleep_timer_off" ( set command=9 )
         if "%passed_command%"=="backup" ( set command=10 )
         if "%passed_command%"=="initialize" ( set command=11 )
-        if "%passed_command%"=="delete_commands" ( set command=98 )
-        if "%passed_command%"=="create_commands" ( set command=99 )
 	)
 
 	set "dir_path=%USERPROFILE%\Kyocera_Commands"
@@ -263,9 +341,6 @@ if "%arg_1%"=="" (
     if %command%==9 ( set match=9 )
     if %command%==10 ( set match=10 )
     if %command%==11 ( set match=11 )
-    if %command%==98 ( set match=98 )
-    if %command%==99 ( set match=99 )
-    if %command%==0 ( set match=0 )
 
 	if %match%==1 ( call :event_log "%passed_ip%" "%match%" )
 	if %match%==2 ( call :toggle_tiered_color "%passed_ip%" "%match%" )
@@ -278,9 +353,6 @@ if "%arg_1%"=="" (
 	if %match%==9 ( call :toggle_sleep_timer "%passed_ip%" "%match%" )
 	if %match%==10 ( call :backup_initialize "%passed_ip%" "%match%" )
 	if %match%==11 ( call :backup_initialize "%passed_ip%" "%match%" )
-	if %match%==98 ( call :backup_initialize "%match%" )
-	if %match%==99 ( call :backup_initialize "%match%" )
-	if %match%==0 ( call :print_error_codes )
 
 	call :error_exit "[INVALID_COMMAND_CHOICE_ERROR]"
 	color

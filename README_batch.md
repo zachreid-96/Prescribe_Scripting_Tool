@@ -61,17 +61,21 @@ bat /path/to/file/prescribe.bat {arg1} {arg2}
 
 All Scripts will work in the same fashion. Able to be interacted with in the same fashion. All Scripts will be able to take the following commands as arguments (args)
 
-    event_log
-    tiered_color_on
-    tiered_color_off
-    60_lines
-    66_lines
-    tray_switch_on
-    tray_switch_off
-    sleep_timer_on
-    sleep_timer_off
-    print_error_list
-    backup
-    initialize
-    delete_commands
-    create_commands
+    prescribe.bat ip_addr event_log
+    prescribe.bat ip_addr tiered_color_on
+    prescribe.bat ip_addr tiered_color_off
+    prescribe.bat ip_addr 60_lines
+    prescribe.bat ip_addr 66_lines
+    prescribe.bat ip_addr tray_switch_on
+    prescribe.bat ip_addr tray_switch_off
+    prescribe.bat ip_addr sleep_timer_on
+    prescribe.bat ip_addr sleep_timer_off
+    prescribe.bat ip_addr print_error_list
+    prescribe.bat ip_addr backup
+    prescribe.bat ip_addr initialize
+    prescribe.bat --commands
+    prescribe.bat --commands print_error_list
+    prescribe.bat --commands delete_commands
+    prescribe.bat --commands create_commands
+    prescribe.bat --help
+    prescribe.bat --update
