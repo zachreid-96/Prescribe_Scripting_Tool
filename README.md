@@ -2,6 +2,9 @@
 
 The aim of the repository is to create a Kyocera Prescribe Tool preloaded with common prescribe commands that can be easily expanded to fit bigger needs. This script was written with backwards compatibility in mind, and with a unified user experience across all scripts in the repo.
 
+## Important
+Main branch is a full collection of scripts, they are not all up to date with the latest edits and bug fixes. To download a specific script language, please do so on the 'Releases' page, as each script now has its own branch. Individual branches will be maintained and will contain the latest updates and edits. End-user feel and experience should remain the same regardless of which script is used. Please check the 'Releases' page for the most up to date builds.
+
 This repository contains the script tool in multiple languages:
 - **Batch** (`batch/`): Windows `.bat` scripts
 - **Bash** (`bash/`): Linux/macOS shell scripts (v3.2 and higher)
