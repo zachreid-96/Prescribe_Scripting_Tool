@@ -84,15 +84,21 @@ bash /path/to/file/prescribe.py {arg1} {arg2}
 
 All Scripts will work in the same fashion. Able to be interacted with in the same fashion. All Scripts will be able to take the following commands as arguments (args)
 
-    event_log
-    tiered_color_on
-    tiered_color_off
-    60_lines
-    66_lines
-    tray_switch_on
-    tray_switch_off
-    sleep_timer_on
-    sleep_timer_off
-    print_error_list
-    backup
-    initialize
+    python prescribe.py ip_addr event_log
+    python prescribe.py ip_addr tiered_color_on
+    python prescribe.py ip_addr tiered_color_off
+    python prescribe.py ip_addr 60_lines
+    python prescribe.py ip_addr 66_lines
+    python prescribe.py ip_addr tray_switch_on
+    python prescribe.py ip_addr tray_switch_off
+    python prescribe.py ip_addr sleep_timer_on
+    python prescribe.py ip_addr sleep_timer_off
+    python prescribe.py ip_addr print_error_list
+    python prescribe.py ip_addr backup
+    python prescribe.py ip_addr initialize
+    python prescribe.py --commands
+    python prescribe.py --commands print_error_list
+    python prescribe.py --commands delete_commands
+    python prescribe.py --commands create_commands
+    python prescribe.py --help
+    python prescribe.py --update
