@@ -81,7 +81,7 @@ if "%arg_1%"=="" (
     echo.
     echo Please see the README.md for help with this script
     echo Or visit the following link to see the README, script notes, or submit a bug report
-    echo https://github.com/zachreid-96/Prescribe_Scripting_Tool/tree/python
+    echo https://github.com/zachreid-96/Prescribe_Scripting_Tool/tree/batch
     echo.
     echo The following are all commands passable via CLI (let ip_addr stand for any given IP address)
     echo.
@@ -110,7 +110,7 @@ if "%arg_1%"=="" (
 
 :update_options
     echo.
-    echo Or visit the following link to check for an updated version, find the newest 'Python-v' tag
+    echo Or visit the following link to check for an updated version, find the newest 'Batch-v' tag
     echo https://github.com/zachreid-96/Prescribe_Scripting_Tool/releases
     echo.
     call :safe_exit "SAFE EXIT - Displayed Update Link"
