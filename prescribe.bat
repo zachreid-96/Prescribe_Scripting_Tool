@@ -104,7 +104,7 @@ if "%arg_1%"=="" (
     echo prescribe.bat --help
     echo prescribe.bat --update
     echo.
-    call :safe_exit "SAFE EXIT - Output Help/Update Options"
+    call :safe_exit "SAFE EXIT - Displayed Help Options"
     color
     exit
 
